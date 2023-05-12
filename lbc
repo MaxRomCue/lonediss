@@ -1,0 +1,81 @@
+library(haven)
+library(tidyverse)
+library(kableExtra)
+library(sjPlot)
+
+LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_06APR2023.sav")
+
+
+summary(LBC)
+
+ggplot(LBC, aes(x=eurlonely_w2)) + geom_bar(position="dodge")
+hist(as.numeric(LBC$bld_hba1c_w1))
+
+
+
+print(LBC1936 %>% # getting data 
+        group_by(outcome) %>% # grouping by age_stage
+        summarise(cnt = n()) %>% # counting how many by group of age_stage
+        mutate(props = round(cnt / sum(cnt), 2)), n= 31) # getting frequency
+
+
+
+LBC1936 <- 
+  LBC %>%
+  mutate(
+    bld_crprot_w1 = ifelse(bld_crprot_w1<=3, 0, bld_crprot_w1),#CRP Cardiovascular
+    bld_crprot_w1 = ifelse(bld_crprot_w1>3, 1, bld_crprot_w1),
+    bld_choles_w1 = ifelse(bld_choles_w1<=5, 0, bld_choles_w1),#Total Cholesterol
+    bld_choles_w1 = ifelse(bld_choles_w1>5, 1, bld_choles_w1),
+    bld_hdlchol_w1 = ifelse(bld_hdlchol_w1<=1, 0, bld_hdlchol_w1),#LDL Cholesterol
+    bld_hdlchol_w1 = ifelse(bld_hdlchol_w1>1, 1, bld_hdlchol_w1),
+    bld_triglyc_w1 = ifelse(bld_triglyc_w1<2, 0, bld_triglyc_w1),#Trygliceryde (FASTING OR NOT?)
+    bld_triglyc_w1 = ifelse(bld_triglyc_w1>=2, 1, bld_triglyc_w1),
+    dbp1sit_w1 = ifelse(dbp1sit_w1>=90, 1, dbp1sit_w1),#diastolic sitting (1st read)
+    dbp1sit_w1 = ifelse(dbp1sit_w1<90, 0, dbp1sit_w1),
+    sbp1sit_w1 = ifelse(sbp1sit_w1>=140, 1, sbp1sit_w1),#systolic sitting (1st read)
+    sbp1sit_w1 = ifelse(sbp1sit_w1<140, 0, sbp1sit_w1),
+    bld_hba1c_w1 = ifelse(bld_hba1c_w1>=6.5, 1, bld_hba1c_w1),#diabetes
+    bld_hba1c_w1 = ifelse(bld_hba1c_w1<6.5, 0, bld_hba1c_w1),
+    
+    
+    
+    
+    
+    totalrisk = (bld_crprot_w1 + bld_choles_w1 + dbp1sit_w1),    # discrete
+    outcome = ifelse(totalrisk>0, 1, totalrisk)
+
+  )
+
+summary(LBC1936$bld_hdlchol_w1)
+
+table(LBC1936$eurlonely_w2, LBC1936$bld_hdlchol_w1, useNA = "ifany")%>%
+  kable() %>%
+  kable_styling()
+
+
+
+
+#model binary
+model <- glm(outcome ~ eurlonely_w2 + agedays_w1, #+livealn_w1 + hadstot_w1 + phyactiv_w1, 
+             LBC1936,
+            family = binomial(link = "logit"))
+summary(model)
+
+
+plot_model(model, type = "eff")
+
+#model discrete
+model1 <- lm(totalrisk ~ eurlonely_w2 + agedays_w1, LBC1936)
+summary(model1)
+
+plot_model(model1, type = "eff")
+
+ggplot(LBC1936, aes(x=eurlonely_w2,y=bld_crprot_w1))+
+  geom_point() +
+  geom_smooth(method=lm)
+
+
+#just one variables
+model1 <- lm(bld_hdlchol_w1 ~ eurlonely_w2 + agedays_w1, LBC1936)
+summary(model1)
