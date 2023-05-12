@@ -1,0 +1,108 @@
+library(haven)
+library(tidyverse)
+library(kableExtra)
+library(psych)
+library(lme4)
+library(lmerTest)
+library(sjPlot)
+
+l_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/l_indresp.sav")
+
+clocks <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xepigen_clocks_ns.sav")
+blood <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xlabblood_ns.sav")
+
+
+###REAL PROBLEM: blood data is from w2-3, lonely data only from wave 9
+#inspecting 
+
+
+#plots
+ggplot(bk_youth, aes(x=bk_yplone)) + geom_bar(position="dodge")
+hist(as.numeric(bk_youth$bk_yplone))
+
+hist(as.numeric(l_indresp$l_sclonely))
+hist(as.numeric(l_indresp$l_hcondno9))
+hist(as.numeric(l_indresp$l_finnow))
+
+hist(as.numeric(l_indresp$l_hcondno9))
+
+
+
+hist(as.numeric(l_indresp$l_hcond2))
+
+print(l_indresp %>% # getting data 
+  group_by(l_hcondno2) %>% # grouping by age_stage
+  summarise(cnt = n()) %>% # counting how many by group of age_stage
+  mutate(props = round(cnt / sum(cnt), 2)), n= 31) # getting frequency
+
+#removing below 0??
+
+
+table(l_indresp$l_sclonely, l_indresp$l_sf12pcs_dv, useNA = "ifany")%>%
+  kable() %>%
+  kable_styling()
+
+table(l_indresp$l_sclonely, l_indresp$l_hcondncode16, useNA = "ifany")%>%
+  kable() %>%
+  kable_styling()
+
+
+
+l_indresp <- 
+  l_indresp %>%
+  mutate(
+    l_sclonely = ifelse(l_sclonely<0, NA, l_sclonely),
+    l_dvage = ifelse(l_dvage<16, NA, l_dvage),
+    l_hcond7 = ifelse(l_hcond7<0, NA, l_sclonely),
+    l_sf12pcs_dv = ifelse(l_sf12pcs_dv<0, NA, l_sf12pcs_dv),
+    l_hcondncode16 = ifelse(l_hcondncode16<0, NA, l_hcondncode16),#BP
+    l_health = ifelse(l_health<0, NA, l_health),
+    l_health = as.factor(l_health)
+  )
+
+summary(l_indresp$l_hcondncode16)
+summary(l_indresp$l_sclonely)
+summary(l_indresp$l_hcondno1)
+View(l_indresp$l_hcondno1)
+
+#NEED TO DETERMINE WHICH VARIABLES TO USE (SELF-REPORT, WHICH, AND BIOMARKERS?)
+
+
+table(l_indresp$l_dvage, l_indresp$l_sclonely, useNA = "ifany")%>%
+  kable() %>%
+  kable_styling()
+
+
+
+
+#model
+model1 <- lm(l_sclonely ~ l_dvage + l_hcondncode16, l_indresp)
+summary(model1)
+
+
+#Loneliness should be the predictors, how will to include that?
+
+#Maybe create a single variable with all outcomes (discrete), would need to transform variable that is binary (has the condition or not) and then create another variable summing how "many" conditions the individual has... 
+
+
+model2 <- lm(l_sf12pcs_dv ~ l_sclonely + l_dvage, l_indresp)
+summary(model2)
+
+
+
+ggplot(l_indresp, aes(x=l_sf12pcs_dv,y=l_sclonely))+
+  geom_point() +
+  geom_smooth(method=lm)
+
+
+summary(l_indresp$l_sf12pcs_dv)
+
+plot_model(model2, type = "eff")
+
+model3 <- glm(l_health ~ l_sclonely + l_dvage, l_indresp,
+              family = binomial(link = "logit"))
+summary(model3)
+
+summary(l_indresp$l_finnow)
+
+plot_model(model3, type = "eff")
