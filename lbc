@@ -15,18 +15,20 @@ LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MR
 
 summary(LBC)
 
-ggplot(LBC, aes(x=bld_choles_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC1936$outcome_w1))
+ggplot(LBC1936, aes(x=selfoutcome_w1)) + geom_bar(position="dodge")
+hist(as.numeric(LBC1936$totalrisk_w1))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
 
 colnames(LBC1936)
 
-print(LBC1936 %>% # getting data 
-        group_by(outcome_w1) %>% # grouping by age_stage
+kable(LBC1936 %>% # getting data 
+        group_by(selfoutcome_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
-        mutate(props = round(cnt / sum(cnt), 2)), n= 31) # getting frequency
+        mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
+  kable_styling()
+
 
 
 
@@ -97,8 +99,8 @@ LBC1936 <-
     agedays_w1 = agedays_w1/365,
     
     #covar wave 2
-    hadstot_w2 = ifelse(hadstot_w2<8, 0, hadstot_w2),
-    hadstot_w2 = ifelse(hadstot_w2>=8, 1, hadstot_w2),
+    #hadstot_w2 = ifelse(hadstot_w2<8, 0, hadstot_w2),
+    #hadstot_w2 = ifelse(hadstot_w2>=8, 1, hadstot_w2),
     agedays_w2 = agedays_w2/365,
     
     #outcomes index wave 1
@@ -132,12 +134,12 @@ reverselone1 <- LBC$lonely_w1
 LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code loneliness w1
 
 
-ggplot(LBC1936, aes(lonely_w1, outcome_w1))+#SOME ARE REVERSE CODED?
+ggplot(LBC1936, aes(lonely_w1, totalrisk_w1))+#SOME ARE REVERSE CODED?
   geom_point()+
   geom_smooth(method="glm")
 
 
-table(LBC1936$eurlonely_w2, LBC1936$meandbpsit_w2, useNA = "ifany")%>%
+table(LBC1936$lonely_w1, LBC1936$totalrisk_w1, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
@@ -147,9 +149,8 @@ summary(LBC1936$outcome_w1)
 
 
 
-
 #biomarker model wave 1 outcomes regressed on wave 2 loneliness
-biomodel <- lm(totalrisk_w1 ~ eurlonely_w2 * (livealn_w2) + phyactiv_w1 + hiqual_w1 + sex, LBC1936)
+biomodel <- lm(totalrisk_w1 ~ eurlonely_w2 * (livealn_w2) + phyactiv_w1 + hadstot_w2 + hiqual_w1 + sex, LBC1936)
 summary(biomodel)
 
 ggplot(LBC1936, aes(x=eurlonely_w2,y=totalrisk_w1))+
@@ -157,25 +158,33 @@ ggplot(LBC1936, aes(x=eurlonely_w2,y=totalrisk_w1))+
   geom_smooth(method=lm)
 
 
-biomodelbi <- glm(outcome_w1 ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex,
+biomodelbi <- glm(outcome_w1 ~ eurlonely_w2 * (livealn_w2) + phyactiv_w1 + hadstot_w2 + hiqual_w1 + hmsonum_w1 + sex,
              LBC1936, family = binomial(link = "logit"))
 summary(biomodelbi)
 
 
 #biomarker model wave 1 outcomes regressed on wave 1 loneliness
-biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1 + livealn_w1 + phyactiv_w1 + hiqual_w1 + sex + hmsonum_w1, LBC1936)
+biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (livealn_w1) + phyactiv_w1 + hiqual_w1, LBC1936)
 summary(biomodel_w1)
-biomodelbi_w1 <- glm(outcome_w1 ~ lonely_w1 * (hadstot_w1 + livealn_w1 + phyactiv_w1 )+ hiqual_w1 + sex + hmsonum_w1,
+
+
+biomodelbi_w1 <- glm(outcome_w1 ~ lonely_w1 * (hadstot_w1 + livealn_w1) + phyactiv_w1 + hiqual_w1,
                   LBC1936, family = binomial(link = "logit"))
 summary(biomodelbi_w1)
 
 
 #biomarker model wave 2 outcomes regressed on wave 2 loneliness
-biomodel_w2 <- lm(totalrisk_w2 ~ eurlonely_w2 * (livealn_w2 + eaaq3_w2) + hiqual_w1 + sex + hmsonum_w1, LBC1936)
+biomodel_w2 <- lm(totalrisk_w2 ~ eurlonely_w2 * (livealn_w2) + hadstot_w2 + phyactiv_w1 + hiqual_w1 + sex, LBC1936)
 summary(biomodel_w2)
-biomodelbi_w2 <- glm(outcome_w2 ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex,
+
+biomodelbi_w2 <- glm(outcome_w2 ~ eurlonely_w2 * (livealn_w2 + eaaq3_w2) + hadstot_w2 + hiqual_w1 + sex + hmsonum_w1 + phyactiv_w1,
                      LBC1936, family = binomial(link = "logit"))
 summary(biomodelbi_w2)
+
+
+
+
+
 
 
 #selfreport wave 1 outcomes regressed on wave 2 loneliness
@@ -228,32 +237,32 @@ summary(modelselfbi_w2)
 
 
 #mortality wave 1
-modelmort_w1 <- lm(ageyrs_death ~ lonely_w1 * (livealn_w1 + phyactiv_w1 + hadstot_w1) + hmsonum_w1, LBC1936)
+modelmort_w1 <- lm(ageyrs_death ~ lonely_w1 * (livealn_w1 + phyactiv_w1) + hadstot_w1 + hiqual_w1 + sex, LBC1936)
 summary(modelmort_w1)
 
 
 #mortality wave 2
 
-modelmort_w2 <- lm(ageyrs_death ~ eurlonely_w2 * (hadstot_w2 + livealn_w2 + eaaq3_w2) + phyactiv_w1 + hmsonum_w1, LBC1936)
+modelmort_w2 <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex, LBC1936)
 summary(modelmort_w2)
+
+
+modelmort <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex, LBC1936)
+summary(modelmort)
+
 
 ggplot(LBC1936, aes(x=eurlonely_w2,y=ageyrs_death))+
   geom_point() +
   geom_smooth(method=lm)
 
 
-plot_model(modelself, type = "slope")
-
-?plot_model
+plot_model(modelmort_w1, type = "slope")
 
 
-tab_model(biomodelbi_w2)
+
+tab_model(modelselfbi)
 
 #mortality full boring
-
-modelmort_w <- lm(ageyrs_death ~ eurlonely_w2 + hadstot_w2 + livealn_w2 + hiqual_w1 + sex + phyactiv_w1 + hmsonum_w1 + eaaq3_w2, LBC1936)
-summary(modelmort_w)
-
 
 
 #hadstot_w2 + livealn_w2 + hiqual_w1 + sex + agedays_w2 + phyactiv_w1 + hmsonum_w1 + eaaq3_w2
