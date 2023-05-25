@@ -11,24 +11,28 @@ i_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/i_indresp.sav"
 clocks <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xepigen_clocks_ns.sav")
 blood <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xlabblood_ns.sav")
 x_indresp <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xindresp_ns.sav")
+j_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/j_indresp.sav")
 
 
 #plots
-ggplot(x_indresp, aes(x=condna)) + geom_bar(position="dodge")
-hist(as.numeric(i_indresp$hcond14))
+ggplot(x_indresp, aes(x=i_hcond17)) + geom_bar(position="dodge")
+hist(as.numeric(US$hscrp))
 
-summary(x_indresp$omdiaval)
+summary(i_indresp$i_hcondno1)
 
+j_hcondncode38
 
-
-kable(blood %>% # getting data 
-  group_by(trig) %>% # grouping by age_stage
+kable(i_indresp %>% # getting data 
+  group_by(i_hcondncode14) %>% # grouping by age_stage
+  filter(!is.na(i_hcond14)) %>%
   summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
   kable_styling()
 
+summary(i_indresp$i_hconda17)
+
 i_indresp %>%
-  select(contains("hcond17"))%>%
+  select(contains("hcondn"))%>%
   multi.hist()
 
 
@@ -36,18 +40,6 @@ table(l_indresp$l_sclonely, l_indresp$l_sf12pcs_dv, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
-table(l_indresp$l_sclonely, blood$hscrp, useNA = "ifany")%>%
-  kable() %>%
-  kable_styling()
-
-
-
-
-kable(blood %>% # getting data 
-        group_by(hscrp) %>% # grouping by age_stage
-        summarise(cnt = n()) %>% # counting how many by group of age_stage
-        mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
-  kable_styling()
 
 
 
@@ -62,19 +54,20 @@ bioUS <-
     #This is on blood data
     hscrp = ifelse(hscrp>10, NA, hscrp),#Assigning NAs
     hscrp = ifelse(hscrp<0, NA, hscrp),
-    hscrp = ifelse(hscrp<=3, 0, hscrp),#CRP Cardiovascular (n = 48%)
+    hscrp = ifelse(hscrp<=3, 0, hscrp),#CRP Cardiovascular (n = 22%) - less than LBC
     hscrp = ifelse(hscrp>3, 1, hscrp),
     chol = ifelse(chol<0, NA, chol),#NA
-    chol = ifelse(chol<=5, 0, chol),#Total Cholesterol (n = 59%)
+    chol = ifelse(chol<=5, 0, chol),#Total Cholesterol (n = 59%) - same as LBC
     chol = ifelse(chol>5, 1, chol),
-    hdl = ifelse(hdl<0, NA, hdl),#NA
-    hdl = ifelse(hdl<=1, 1, hdl),#LDL Cholesterol (n = 9%)
+    hdl = ifelse(hdl<0, NA_real_, hdl),#NA
+    hdl = ifelse(hdl<=1, 1, hdl),#LDL Cholesterol (n = 12%) - more than LBC
     hdl = ifelse(hdl>1, 0, hdl),
     trig = ifelse(trig<0, NA, trig),#NA
-    trig = ifelse(trig<2, 0, trig),#Trygliceryde (FASTING OR NOT?) (n = 21%)
+    trig = ifelse(trig<2, 0, trig),#Trygliceryde (n = 32%) - more than LBC
     trig = ifelse(trig>=2, 1, trig),
-    hba1c = ifelse(hba1c<6.5, 0, hba1c),
-    hba1c = ifelse(hba1c>=6.5, 1, hba1c),#diabetes (n = 12%)
+    hba1c = ifelse(hba1c<0, NA, hba1c),#NA
+    hba1c = ifelse(hba1c<48, 0, hba1c),
+    hba1c = ifelse(hba1c>=48, 1, hba1c),#diabetes (n = 6%) - less than LBC
   )
 
 bpUS <- x_indresp %>%
@@ -82,10 +75,10 @@ bpUS <- x_indresp %>%
   full_join(bioUS)%>%
   mutate(
     omdiaval = ifelse(omdiaval<0, NA, omdiaval),#NA
-    omdiaval = ifelse(omdiaval<90, 0, omdiaval),#diastolic sitting (mean) (n = 20%)
+    omdiaval = ifelse(omdiaval<90, 0, omdiaval),#diastolic sitting (n = 7%) - less than LBC
     omdiaval = ifelse(omdiaval>=90, 1, omdiaval),
     omsysval = ifelse(omsysval<0, NA, omsysval),#NA
-    omsysval = ifelse(omsysval<140, 0, omsysval),#systolic sitting (mean) (n = 69%)
+    omsysval = ifelse(omsysval<140, 0, omsysval),#systolic sitting (n = 19%) - less than LBC
     omsysval = ifelse(omsysval>=140, 1, omsysval),
     
     totalrisk = rowSums(cbind(hscrp, chol, hdl, trig, hba1c, omdiaval, omsysval), na.rm = F),    # discrete
@@ -93,27 +86,42 @@ bpUS <- x_indresp %>%
     outcome = ifelse(totalrisk>1, 1, totalrisk),#binary
   )
 
+
+depanx <- j_indresp %>%
+  select(c(pidp, j_hcondncode37, j_hcondncode38))%>%
+  mutate(
+    j_hcondncode37= ifelse(j_hcondncode37<0, NA_real_, j_hcondncode37),
+    j_hcondncode38= ifelse(j_hcondncode38<0, NA_real_, j_hcondncode38),
+  )
+
 US <- i_indresp %>%
-  select(c(pidp, i_dvage, i_sclonely, i_scisolate, i_scleftout, i_sclackcom, i_health, i_sex, i_finnow, i_hhsize, i_sf12pcs_dv, i_health))%>%
+  select(c(pidp, i_dvage, i_sclonely, i_scisolate, i_scleftout, i_sclackcom, i_health, i_sex, i_finnow, i_hhsize, i_sf12pcs_dv, i_health, i_vday, i_mday, i_wday, i_sf12mcs_dv, i_sclfsato))%>%
   full_join(bpUS)%>%
+  full_join(depanx)%>%
   mutate(
   i_sclonely = ifelse(i_sclonely<0, NA_real_, i_sclonely),
   i_dvage = ifelse(i_dvage<16, NA, i_dvage),
+  i_dvage = ifelse(i_dvage>70, NA, i_dvage),
   i_finnow = ifelse(i_finnow<0, NA, i_finnow),
   i_hhsize = ifelse(i_hhsize>2, 2, i_hhsize),
   i_sf12pcs_dv = ifelse(i_sf12pcs_dv<0, NA, i_sf12pcs_dv),
-  #lonely = rowMeans(cbind(i_sclonely, i_scisolate, i_scleftout, i_sclackcom), na.rm = T),
-  #lonely = ifelse(lonely<0, NA, lonely),
+  lonely = rowMeans(cbind(i_sclonely, i_scisolate, i_scleftout, i_sclackcom), na.rm = T),
+  lonely = ifelse(lonely<0, NA, lonely),
 
   #self-report, which ones to use?
   #l_hcond7 = ifelse(l_hcond7<0, NA, l_sclonely),
   #l_sf12pcs_dv = ifelse(l_sf12pcs_dv<0, NA, l_sf12pcs_dv),
   #l_hcondncode16 = ifelse(l_hcondncode16<0, NA, l_hcondncode16),#BP
   i_health = ifelse(i_health<0, NA, i_health),
-  i_health = as.factor(i_health)
+  i_health = as.factor(i_health),
+  
+  #exercise
+  i_vday = ifelse(i_vday<0, NA, i_vday),
+  i_mday = ifelse(i_mday<0, NA, i_mday),
+  i_wday = ifelse(i_wday<0, NA, i_wday)
+  
   )
   
-
   
 
 #NEED TO DETERMINE WHICH VARIABLES TO USE (SELF-REPORT, WHICH)
@@ -126,27 +134,33 @@ table(US$i_sex, US$i_sclonely, useNA = "ifany")%>%
 
 #Biomarker Model wave 2-3 outcomes regressed on wave 9 loneliness
 
-biomodel <- lm(totalrisk ~ i_sclonely * (i_hhsize) + i_dvage + i_sex  + i_finnow, US)
+biomodel <- lm(totalrisk ~ i_sclonely * (i_hhsize + i_sf12pcs_dv) + i_sf12mcs_dv + i_dvage + i_sex + i_finnow, US)
 summary(biomodel)
 
-biomodelbi <- glm(outcome ~ i_sclonely * (i_hhsize) + i_dvage + i_sex + i_finnow, US, 
+biomodelbi <- glm(outcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
                   family = binomial(link = "logit"))
 summary(biomodelbi)
 
 
 #Self-Report Health regressed on loneliness (w9)
-modelqol <- lm(i_sf12pcs_dv ~ i_sclonely + i_dvage + i_finnow, US)
+modelqol <- lm(i_sf12pcs_dv ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize + i_dvage + i_sex  + i_finnow, US)
 summary(modelqol)
 
-modelhealth <- glm(i_health ~ i_sclonely + i_dvage + i_sex + i_finnow, US, 
+modelhealth <- glm(i_health ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
                    family = binomial(link = "logit"))
 summary(modelhealth)
 
+modellife <- lm(i_sclfsato ~ i_sclonely * (i_hhsize + i_sf12pcs_dv) + i_sf12mcs_dv + i_dvage + i_sex  + i_finnow, US)
+summary(modellife)
 
 #Model Graphs
 ggplot(US, aes(x=i_sclonely,y=i_sf12pcs_dv))+
   geom_point() +
   geom_smooth(method=lm)
+
+
+plot_model(modellife, type = "est")
+tab_model(biomodel)
 
 
 plot_model(modelhealth, type = "eff")
