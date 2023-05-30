@@ -1,0 +1,107 @@
+library(tidyverse)
+library(psych)
+library(car)
+library(lavaan)
+library(semPlot)
+
+
+
+LBCtest %>%
+  describe %>%
+  as.data.frame() %>%
+  rownames_to_column(., var = "variable")%>%
+  select(variable, mean, sd, skew, kurtosis)%>%
+  kable(digits = 2)%>%
+  kable_styling(full_width = F)
+
+LBCtest %>%
+  pivot_longer(2:11, names_to = "variable", values_to="score") %>%
+  ggplot(aes(x=score))+
+  geom_density()+
+  facet_wrap(~variable)+
+  theme_light()
+
+
+
+#RMSEA, SRMR .05; TLI, CFI .95
+#CFA
+
+modelcholes <- '
+choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
+
+#co-variances
+bld_choles_w1 ~~ bld_hdlchol_w1
+bld_choles_w1 ~~      hichol_w1
+
+
+'
+modelfitcholes <- cfa(modelcholes, LBC1936, std.lv = T)
+summary(modelfitcholes, fit = T, standardized = T)
+semPaths(modelfitcholes, what='stand')
+modindices(modelfitcholes, sort = T)
+
+modelbp <-'
+bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
+'
+modelfitbp <- cfa(modelbp, LBC1936, std.lv = T)
+summary(modelfitbp, fit = T, standardized = T)
+modindices(modelfitbp, sort = T)
+semPaths(modelfitbp, what="paths")
+?semPaths
+
+summary(LBC1936$cvdhist_w1)
+
+
+#SEM 
+
+semmodel_w1 <- '
+
+#cholesterol
+choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
+
+#co-variances
+bld_choles_w1 ~~ bld_hdlchol_w1
+bld_choles_w1 ~~ hichol_w1
+
+#cardiovascular disease
+cardio =~ bld_crprot_w1 + cvdhist_w1
+
+#blood pressure
+bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
+
+
+#diabetes
+diab =~ bld_hba1c_w1 + diab_w1
+
+#strokes
+stroke =~ stroke_mask_w2 + stroke_w1
+
+#dementia
+dementia =~ dementia_code
+
+#chronic health index 
+risk =~ choles + cardio + bp + diab + dementia + stroke
+
+risk ~ lonely_w1 + livealn_w1 + phyactiv_w1 + hiqual_w1 + sex
+phyactiv_w1 ~ lonely_w1
+
+
+
+#moderator paths... need to work on it
+phyactiv_w1 ~ lonely_w1
+
+
+
+'
+
+sem_model_w1 <- sem(semmodel_w1, LBC1936, 
+                    #se = 'bootstrap',
+                    missing = 'FIML')
+summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+
+semPaths(sem_model_w1, what='paths')
+modindices(sem_model_w1, sort = T)
+
+
+cor.test(LBC1936$dement_w1, LBC1936$dementia_code)
+summary(LBC1936$dement_w1)
