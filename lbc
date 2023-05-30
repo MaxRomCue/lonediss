@@ -15,8 +15,8 @@ LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MR
 
 summary(LBC)
 
-ggplot(LBC1936, aes(x=selfoutcome_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC1936$totalrisk_w1))
+ggplot(LBC1936, aes(x=dement_w1)) + geom_bar(position="dodge")
+hist(as.numeric(LBC1936$dement_w1))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
@@ -24,7 +24,7 @@ LBCtest <- LBC1936 %>%
 colnames(LBC1936)
 
 kable(LBC1936 %>% # getting data 
-        group_by(selfoutcome_w1) %>% # grouping by age_stage
+        group_by(dement_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -107,7 +107,7 @@ LBC1936 <-
     selfreporttotal_w1 = hibp_w1 + cvdhist_w1 + hichol_w1 + dement_w1 + diab_w1 + stroke_w1, 
     selfoutcome_w1 = ifelse(selfreporttotal_w1>0, 1, selfreporttotal_w1),#binary
     
-    totalrisk_w1 = rowSums(cbind(bld_crprot_w1, bld_choles_w1, bld_hdlrat_w1, bld_hdlchol_w1, bld_triglyc_w1 , meandbpsit_w1 , meansbpsit_w1 , bld_hba1c_w1 , dementia_code , stroke_mask_w2), na.rm = T),    # discrete
+    totalrisk_w1 = rowMeans(cbind(bld_crprot_w1, bld_choles_w1, bld_hdlrat_w1, bld_hdlchol_w1, bld_triglyc_w1 , meandbpsit_w1 , meansbpsit_w1 , bld_hba1c_w1 , dementia_code , stroke_mask_w2), na.rm = T),    # discrete
     outcome_w1 = ifelse(totalrisk_w1<=0, 0, totalrisk_w1),#binary
     outcome_w1 = ifelse(totalrisk_w1>0, 1, totalrisk_w1),#binary
     
@@ -144,29 +144,14 @@ table(LBC1936$lonely_w1, LBC1936$totalrisk_w1, useNA = "ifany")%>%
   kable_styling()
 
 
-summary(LBC1936$outcome_w1)
-
-
-
-
-#biomarker model wave 1 outcomes regressed on wave 2 loneliness
-biomodel <- lm(totalrisk_w1 ~ eurlonely_w2 * (livealn_w2) + phyactiv_w1 + hadstot_w2 + hiqual_w1 + sex, LBC1936)
-summary(biomodel)
-
-ggplot(LBC1936, aes(x=eurlonely_w2,y=totalrisk_w1))+
-  geom_point() +
-  geom_smooth(method=lm)
-
-
-biomodelbi <- glm(outcome_w1 ~ eurlonely_w2 * (livealn_w2) + phyactiv_w1 + hadstot_w2 + hiqual_w1 + hmsonum_w1 + sex,
-             LBC1936, family = binomial(link = "logit"))
-summary(biomodelbi)
-
 
 #biomarker model wave 1 outcomes regressed on wave 1 loneliness
-biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (livealn_w1) + phyactiv_w1 + hiqual_w1, LBC1936)
+biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (livealn_w1 + phyactiv_w1) + hiqual_w1 + sex, LBC1936)
 summary(biomodel_w1)
 
+ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
+  geom_point() +
+  geom_smooth(method=lm)
 
 biomodelbi_w1 <- glm(outcome_w1 ~ lonely_w1 * (hadstot_w1 + livealn_w1) + phyactiv_w1 + hiqual_w1,
                   LBC1936, family = binomial(link = "logit"))
@@ -182,29 +167,13 @@ biomodelbi_w2 <- glm(outcome_w2 ~ eurlonely_w2 * (livealn_w2 + eaaq3_w2) + hadst
 summary(biomodelbi_w2)
 
 
-
-
-
-
-
-#selfreport wave 1 outcomes regressed on wave 2 loneliness
-modelself <- lm(selfreporttotal_w1 ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex, LBC1936)
-summary(modelself)
-
-
-modelselfbi <- glm(selfoutcome_w1 ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex,
-             LBC1936, family = binomial(link = "logit"))
-summary(modelselfbi)
-
-
-
 #graphs
-ggplot(LBC1936, aes(x=eurlonely_w2,y=totalrisk_w2))+
+ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
   geom_point() +
   geom_smooth(method="lm", col = "red")
 
 
-visreg(biomodelbi_w2, "eurlonely_w2", gg = T, scale = "response")+
+visreg(biomodelbi_w1, "lonely_w1", gg = T, scale = "response")+
          labs(y = "Prob (Self-Report Chronic Condition)",
               x = "Loneliness",
               subtitle = "controlling for dep/anx, living alone, sex",
@@ -247,26 +216,15 @@ modelmort_w2 <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + ha
 summary(modelmort_w2)
 
 
-modelmort <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + hadstot_w2 + hiqual_w1 + sex, LBC1936)
-summary(modelmort)
-
-
 ggplot(LBC1936, aes(x=eurlonely_w2,y=ageyrs_death))+
   geom_point() +
   geom_smooth(method=lm)
 
 
 plot_model(modelmort_w1, type = "slope")
-
-
-
 tab_model(modelselfbi)
 
-#mortality full boring
+
 
 
 #hadstot_w2 + livealn_w2 + hiqual_w1 + sex + agedays_w2 + phyactiv_w1 + hmsonum_w1 + eaaq3_w2
-
-
-
-# check covariates response directions
