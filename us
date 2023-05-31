@@ -20,8 +20,8 @@ hist(as.numeric(USoc$hcond17))
 
 
 kable(USoc %>% # getting data 
-  group_by(selfreporttotal) %>% # grouping by age_stage
-  filter(!is.na(selfreporttotal)) %>%
+  group_by(hcbp) %>% # grouping by age_stage
+  filter(!is.na(hcbp)) %>%
   summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
   kable_styling()
@@ -274,13 +274,18 @@ USoc <- US %>%
   full_join(h_ind)%>%
   mutate(
     hcdep = rowSums(cbind(a_hcond17, c_hcond17, d_hcond17, e_hcond17, f_hcond17, g_hcond17, h_hcond7), na.rm = T),
+    hcdep = ifelse(hcdep>1, 1, hcdep),
     hcheart = rowSums(cbind(a_hcond3, c_hcond3, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3), na.rm = T),
     hccor = rowSums(cbind(a_hcond4, c_hcond4, d_hcond4, e_hcond4, f_hcond4, g_hcond4, h_hcond4), na.rm = T),
-    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3), na.rm = T),
+    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond7, e_hcond7, f_hcond7, g_hcond7, h_hcond7), na.rm = T),
     hchypert = rowSums(cbind(a_hcond9, c_hcond9, d_hcond9, e_hcond9, f_hcond9, g_hcond9, h_hcond9), na.rm = T),
     hchipot = rowSums(cbind(a_hcond10, c_hcond10, d_hcond10, e_hcond10, f_hcond10, g_hcond10, h_hcond10), na.rm = T),
+    hchipot = ifelse(hchipot>1, 1, hchipot),
     hcdiab = rowSums(cbind(a_hcond14, c_hcond14, d_hcond14, e_hcond14, f_hcond14, g_hcond14, h_hcond14), na.rm = T),
+    hcdiab = ifelse(hcdiab>1, 1, hcdiab),
     hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16), na.rm = T),
+    hcbp = ifelse(hcbp>1, 1, hcbp),
+    
     
     #outcomes index
     selfreporttotal = hcdep + hcheart + hccor + hcstro + hchypert + hchipot + hcdiab + hcbp, 
@@ -303,3 +308,42 @@ plot_model(modelselfbi, type = "int")
 
 
 #Next steps: figure out how to consider physical activity variable
+
+
+semmodel_w1 <- '
+
+#cholesterol
+choles =~ hdl + trig #+ hchypert + hchipot
+
+#cardiovascular disease
+cardio =~ hscrp #+ hcheart + hccor
+
+#blood pressure
+bp =~ omdiaval + omsysval #+ hcbp
+
+#diabetes
+diab =~ hba1c #+ hcdiab
+
+#stroke
+#stroke =~ hcstro
+
+#chronic health index 
+risk =~ choles + cardio + bp + diab #+ stroke
+
+risk ~ i_sclonely  + i_vday + i_mday + i_wday + i_dvage + i_sex + i_finnow + i_hhsize + i_sf12pcs_dv
+
+
+#moderator paths... need to work on it
+
+
+'
+sem_model_w1 <- sem(semmodel_w1, USoc, 
+                    #se = 'bootstrap',
+                    missing = 'FIML')
+summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+
+semPaths(sem_model_w1, what='paths')
+modindices(sem_model_w1, sort = T)
+
+
+summary(USoc$hba1c)
