@@ -57,11 +57,7 @@ summary(LBC1936$cvdhist_w1)
 semmodel_w1 <- '
 
 #cholesterol
-choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
-
-#co-variances
-bld_choles_w1 ~~ bld_hdlchol_w1
-bld_choles_w1 ~~ hichol_w1
+choles =~ bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
 
 #cardiovascular disease
 cardio =~ bld_crprot_w1 + cvdhist_w1
@@ -83,13 +79,9 @@ dementia =~ dementia_code
 risk =~ choles + cardio + bp + diab + dementia + stroke
 
 risk ~ lonely_w1 + livealn_w1 + phyactiv_w1 + hiqual_w1 + sex
-phyactiv_w1 ~ lonely_w1
-
 
 
 #moderator paths... need to work on it
-phyactiv_w1 ~ lonely_w1
-
 
 
 '
@@ -104,4 +96,3 @@ modindices(sem_model_w1, sort = T)
 
 
 cor.test(LBC1936$dement_w1, LBC1936$dementia_code)
-summary(LBC1936$dement_w1)
