@@ -15,13 +15,13 @@ j_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/j_indresp.sav"
 
 
 #plots
-ggplot(x_indresp, aes(x=i_hcond17)) + geom_bar(position="dodge")
-hist(as.numeric(USoc$hcond17))
+ggplot(USoc, aes(x=i_dvage)) + geom_bar(position="dodge")
+hist(as.numeric(USoc$hchypert))
 
 
 kable(USoc %>% # getting data 
-  group_by(hcbp) %>% # grouping by age_stage
-  filter(!is.na(hcbp)) %>%
+  group_by(i_dvage) %>% # grouping by age_stage
+  filter(!is.na(i_dvage)) %>%
   summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
   kable_styling()
@@ -33,7 +33,7 @@ i_indresp %>%
   multi.hist()
 
 
-table(USoc$selfreporttotal, USoc$i_sclonely, useNA = "ifany")%>%
+table(USoc$i_sf12pcs_dv, USoc$i_sclonely, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
@@ -95,7 +95,7 @@ US <- i_indresp %>%
   full_join(depanx)%>%
   mutate(
   i_sclonely = ifelse(i_sclonely<0, NA_real_, i_sclonely),
-  i_dvage = ifelse(i_dvage<16, NA, i_dvage),
+  i_dvage = ifelse(i_dvage<18, NA, i_dvage),
   i_dvage = ifelse(i_dvage>70, NA, i_dvage),
   i_finnow = ifelse(i_finnow<0, NA, i_finnow),
   i_hhsize = ifelse(i_hhsize>2, 2, i_hhsize),
@@ -129,7 +129,7 @@ table(US$i_sex, US$i_sclonely, useNA = "ifany")%>%
 
 #Biomarker Model wave 2-3 outcomes regressed on wave 9 loneliness
 
-biomodel <- lm(totalrisk ~ i_sclonely * (i_hhsize + i_sf12pcs_dv) + i_sf12mcs_dv + i_dvage + i_sex + i_finnow, US)
+biomodel <- lm(totalrisk ~ i_sclonely * (i_hhsize + i_sf12pcs_dv + i_vday + i_mday + i_wday) + i_sf12mcs_dv + i_dvage + i_sex + i_finnow, US)
 summary(biomodel)
 
 biomodelbi <- glm(outcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
@@ -307,33 +307,63 @@ plot_model(modelselfbi, type = "int")
 
 
 
-#Next steps: figure out how to consider physical activity variable
-
-
 semmodel_w1 <- '
 
 #cholesterol
-choles =~ hdl + trig #+ hchypert + hchipot
+choles =~ chol + hdl + trig + hchypert + hchipot
+
 
 #cardiovascular disease
-cardio =~ hscrp #+ hcheart + hccor
+cardio =~ hscrp + hcheart + hccor
 
 #blood pressure
-bp =~ omdiaval + omsysval #+ hcbp
+bp =~ omdiaval + omsysval + hcbp
 
 #diabetes
-diab =~ hba1c #+ hcdiab
+diab =~ hba1c + hcdiab
 
 #stroke
 #stroke =~ hcstro
 
 #chronic health index 
-risk =~ choles + cardio + bp + diab #+ stroke
+risk =~ choles + cardio + bp + diab #+ stroke 
 
-risk ~ i_sclonely  + i_vday + i_mday + i_wday + i_dvage + i_sex + i_finnow + i_hhsize + i_sf12pcs_dv
+#risk ~ i_sclonely + i_hhsize + i_vday + i_mday + i_wday + i_dvage + i_sex + i_finnow + i_sf12pcs_dv + i_sclonely:i_wday + i_sclonely:i_mday + i_sclonely:i_vday + i_sclonely:i_sf12pcs_dv + i_sclonely:i_hhsize
 
 
-#moderator paths... need to work on it
+#Direct
+risk ~ c*i_sclonely
+risk ~ i_hhsize
+risk ~ i_finnow
+risk ~ i_dvage
+
+risk ~ b2*i_vday
+risk ~ b3*i_mday
+risk ~ b4*i_wday
+risk ~ b5*i_sf12pcs_dv
+
+
+i_vday ~ a2*i_sclonely
+i_mday ~ a3*i_sclonely
+i_wday ~ a4*i_sclonely
+i_sf12pcs_dv ~ a5*i_sclonely
+
+
+#Indirect
+ind2:=a2*b2
+ind3:=a3*b3
+ind4:=a4*b4
+ind5:=a5*b5
+
+#Total
+Total2:=c+a2*b2 #
+Total3:=c+a3*b3
+Total4:=c+a4*b4
+Total5:=c+a5*b5
+
+#Covariances
+
+i_vday  ~       i_mday
 
 
 '
@@ -346,4 +376,9 @@ semPaths(sem_model_w1, what='paths')
 modindices(sem_model_w1, sort = T)
 
 
-summary(USoc$hba1c)
+
+#Need to Scale? Age...physical activity
+varTable(sem_model_w1)
+
+USoc$i_wday <- 
+  scale(USoc$i_wday)
