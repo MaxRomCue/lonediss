@@ -78,11 +78,22 @@ dementia =~ dementia_code
 #chronic health index 
 risk =~ choles + cardio + bp + diab + dementia + stroke
 
-risk ~ lonely_w1 + livealn_w1 + phyactiv_w1 + hiqual_w1 + sex
+risk ~ c*lonely_w1
+risk ~ livealn_w1
+risk ~ phyactiv_w1
+risk ~ hiqual_w1
+risk ~ sex
+
+risk ~ b*phyactiv_w1
+
+phyactiv_w1 ~ a*lonely_w1
 
 
-#moderator paths... need to work on it
+#Indirect
+ind:=a*b
 
+#Total
+Total:=c+a*b
 
 '
 
