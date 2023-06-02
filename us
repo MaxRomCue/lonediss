@@ -5,6 +5,8 @@ library(psych)
 library(lme4)
 library(lmerTest)
 library(sjPlot)
+library(lavaan)
+library(semPlot)
 
 
 i_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/i_indresp.sav")
@@ -15,13 +17,13 @@ j_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/j_indresp.sav"
 
 
 #plots
-ggplot(USoc, aes(x=i_dvage)) + geom_bar(position="dodge")
-hist(as.numeric(USoc$hchypert))
+ggplot(USoc, aes(x=i_sclonely)) + geom_bar(position="dodge")
+hist(as.numeric(USoc$i_sclonely))
 
 
 kable(USoc %>% # getting data 
-  group_by(i_dvage) %>% # grouping by age_stage
-  filter(!is.na(i_dvage)) %>%
+  group_by(hba1c) %>% # grouping by age_stage
+  filter(!is.na(hba1c)) %>%
   summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
   kable_styling()
@@ -95,6 +97,9 @@ US <- i_indresp %>%
   full_join(depanx)%>%
   mutate(
   i_sclonely = ifelse(i_sclonely<0, NA_real_, i_sclonely),
+  i_scisolate = ifelse(i_scisolate<0, NA_real_, i_scisolate),
+  i_scleftout = ifelse(i_scleftout<0, NA_real_, i_scleftout),
+  i_sclackcom = ifelse(i_sclackcom<0, NA_real_, i_sclackcom),
   i_dvage = ifelse(i_dvage<18, NA, i_dvage),
   i_dvage = ifelse(i_dvage>70, NA, i_dvage),
   i_finnow = ifelse(i_finnow<0, NA, i_finnow),
@@ -129,12 +134,13 @@ table(US$i_sex, US$i_sclonely, useNA = "ifany")%>%
 
 #Biomarker Model wave 2-3 outcomes regressed on wave 9 loneliness
 
-biomodel <- lm(totalrisk ~ i_sclonely * (i_hhsize + i_sf12pcs_dv + i_vday + i_mday + i_wday) + i_sf12mcs_dv + i_dvage + i_sex + i_finnow, US)
+biomodel <- lm(totalrisk ~ lonely * (i_hhsize + i_sf12pcs_dv + i_vday + i_mday + i_wday) + i_sf12mcs_dv + i_dvage + i_sex + i_finnow, US)
 summary(biomodel)
 
 biomodelbi <- glm(outcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
                   family = binomial(link = "logit"))
 summary(biomodelbi)
+
 
 
 #Self-Report Health regressed on loneliness (w9)
@@ -186,7 +192,7 @@ a_ind <- a_indresp %>%
   )
 
 c_ind <- c_indresp %>%
-  select(c(pidp, c_hcond17, c_hcond3, c_hcond4, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
+  select(c(pidp, c_closenum, c_hcond17, c_hcond3, c_hcond4, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
   mutate(
     c_hcond17 = ifelse(c_hcond17<0, NA_real_, c_hcond17),
     c_hcond3 = ifelse(c_hcond3<0, NA, c_hcond3),
@@ -195,7 +201,8 @@ c_ind <- c_indresp %>%
     c_hcond9 = ifelse(c_hcond9<0, NA, c_hcond9),
     c_hcond10 = ifelse(c_hcond10<0, NA, c_hcond10),
     c_hcond14 = ifelse(c_hcond14<0, NA, c_hcond14),
-    c_hcond16 = ifelse(c_hcond16<0, NA, c_hcond16)
+    c_hcond16 = ifelse(c_hcond16<0, NA, c_hcond16),
+    c_closenum = ifelse(c_closenum<0, NA, c_closenum),
   )
 
 d_ind <- d_indresp %>%
@@ -293,25 +300,34 @@ USoc <- US %>%
   )
   
 
-
-
 #model
-modelself <- lm(selfreporttotal ~ i_sclonely * i_hhsize + i_dvage + i_sex + i_finnow, USoc)
+modelself <- lm(selfreporttotal ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex + i_finnow, USoc)
 summary(modelself)
 
 modelselfbi <- glm(selfoutcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, USoc,
                    family = binomial(link = "logit"))
 summary(modelselfbi)
   
-plot_model(modelselfbi, type = "int")
+plot_model(modelself, type = "slope")
+
+
+#SEM
+
+#Need to Scale? Age...physical activity
+varTable(sem_model)
+
+USoc$i_wday <- scale(USoc$i_wday)
+USoc$i_mday <- scale(USoc$i_mday)
+USoc$i_vday <- scale(USoc$i_vday)
+USoc$i_dvage <- scale(USoc$i_dvage)
+USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
 
 
 
-semmodel_w1 <- '
+semmodel <- '
 
 #cholesterol
 choles =~ chol + hdl + trig + hchypert + hchipot
-
 
 #cardiovascular disease
 cardio =~ hscrp + hcheart + hccor
@@ -323,62 +339,49 @@ bp =~ omdiaval + omsysval + hcbp
 diab =~ hba1c + hcdiab
 
 #stroke
-#stroke =~ hcstro
+stroke =~ hcstro
 
 #chronic health index 
-risk =~ choles + cardio + bp + diab #+ stroke 
+risk =~ choles + cardio + bp + diab + stroke 
 
-#risk ~ i_sclonely + i_hhsize + i_vday + i_mday + i_wday + i_dvage + i_sex + i_finnow + i_sf12pcs_dv + i_sclonely:i_wday + i_sclonely:i_mday + i_sclonely:i_vday + i_sclonely:i_sf12pcs_dv + i_sclonely:i_hhsize
+#physical activity
+physical =~ i_vday + i_mday + i_wday
 
+
+#loneliness
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 #Direct
-risk ~ c*i_sclonely
+risk ~ c*lone
 risk ~ i_hhsize
 risk ~ i_finnow
 risk ~ i_dvage
 
-risk ~ b2*i_vday
-risk ~ b3*i_mday
-risk ~ b4*i_wday
+
+
+risk ~ b2*physical
 risk ~ b5*i_sf12pcs_dv
 
-
-i_vday ~ a2*i_sclonely
-i_mday ~ a3*i_sclonely
-i_wday ~ a4*i_sclonely
-i_sf12pcs_dv ~ a5*i_sclonely
+physical ~ a2*lone
+i_sf12pcs_dv ~ a5*lone
 
 
 #Indirect
 ind2:=a2*b2
-ind3:=a3*b3
-ind4:=a4*b4
 ind5:=a5*b5
 
 #Total
-Total2:=c+a2*b2 #
-Total3:=c+a3*b3
-Total4:=c+a4*b4
+Total2:=c+a2*b2
 Total5:=c+a5*b5
 
 #Covariances
-
-i_vday  ~       i_mday
-
+i_sf12pcs_dv  ~         risk
 
 '
-sem_model_w1 <- sem(semmodel_w1, USoc, 
+sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
                     missing = 'FIML')
-summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+summary(sem_model, fit.measures = T, standardized =T, ci = T)
 
-semPaths(sem_model_w1, what='paths')
-modindices(sem_model_w1, sort = T)
-
-
-
-#Need to Scale? Age...physical activity
-varTable(sem_model_w1)
-
-USoc$i_wday <- 
-  scale(USoc$i_wday)
+semPaths(sem_model, what='mod')
+modindices(sem_model, sort = T)
