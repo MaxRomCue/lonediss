@@ -27,9 +27,11 @@ LBCtest %>%
 #CFA
 
 modelcholes <- '
-choles =~ bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
+diab =~ bld_hba1c_w1 + diab_w1
 '
 modelfitcholes <- cfa(modelcholes, LBC1936, std.lv = T)
+
+
 summary(modelfitcholes, fit = T, standardized = T)
 semPaths(modelfitcholes, what='path')
 modindices(modelfitcholes, sort = T)
@@ -41,9 +43,7 @@ modelfitbp <- cfa(modelbp, LBC1936, std.lv = T)
 summary(modelfitbp, fit = T, standardized = T)
 modindices(modelfitbp, sort = T)
 semPaths(modelfitbp, what="paths")
-?semPaths
 
-summary(LBC1936$cvdhist_w1)
 
 
 #SEM 
@@ -51,7 +51,7 @@ summary(LBC1936$cvdhist_w1)
 semmodel_w1 <- '
 
 #cholesterol
-choles =~ bld_hdlchol_w1 + sty + hichol_w1 + bld_triglyc_w1
+choles =~ bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
 
 #cardiovascular disease
 cardio =~ bld_crprot_w1 + cvdhist_w1
@@ -72,7 +72,12 @@ dementia =~ dementia_code
 #chronic health index 
 risk =~ choles + cardio + bp + diab + dementia + stroke
 
-risk ~ lonely_w1 + livealn_w1 + phyactiv_w1 + hiqual_w1 + sex
+risk ~ c*lonely_w1
+risk ~ livealn_w1
+risk ~ hiqual_w1
+risk ~ sex
+
+risk ~ b*phyactiv_w1
 
 
 #moderator paths... need to work on it
@@ -98,6 +103,3 @@ modindices(sem_model_w1, sort = T)
 
 
 cor.test(LBC1936$dement_w1, LBC1936$dementia_code)
-
-
-
