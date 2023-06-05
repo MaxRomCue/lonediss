@@ -9,6 +9,9 @@ library(GGally)
 library(lme4)
 library(lmerTest)
 library(visreg)
+library(car)
+library(lavaan)
+library(semPlot)
 
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_06APR2023.sav")
 
@@ -24,39 +27,36 @@ LBCtest <- LBC1936 %>%
 colnames(LBC1936)
 
 kable(LBC1936 %>% # getting data 
-        group_by(dement_w1) %>% # grouping by age_stage
+        group_by(bld_choles_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
 
-
-
-
-
-
-ggplot(LBC1936, aes(lonely_w1, selfoutcome_w1))+
+ggplot(LBC1936, aes(meandbpsit_w1, meandbpsit_w1))+
   geom_pointrange()
 
 
-LBC %>%
-  select(contains("lonely"))%>%
+LBC1936 %>%
+  select(contains("mean"))%>%
   multi.hist()
 
 ggpairs(LBCtest, title="All variables")
 
+
+rowSums
 LBC1936 <- 
   LBC %>%
   mutate(
     #outcomes wave 1
     bld_crprot_w1 = ifelse(bld_crprot_w1<=3, 0, bld_crprot_w1),#CRP Cardiovascular (n = 48%)
     bld_crprot_w1 = ifelse(bld_crprot_w1>3, 1, bld_crprot_w1),
-    bld_choles_w1 = ifelse(bld_choles_w1<=5, 0, bld_choles_w1),#Total Cholesterol (n = 59%)
-    bld_choles_w1 = ifelse(bld_choles_w1>5, 1, bld_choles_w1),
+    bld_choles_w1 = ifelse(bld_choles_w1<=6.2, 0, bld_choles_w1),#Total Cholesterol (n = 23%)
+    bld_choles_w1 = ifelse(bld_choles_w1>6.2, 1, bld_choles_w1),
     bld_hdlchol_w1 = ifelse(bld_hdlchol_w1<=1, 1, bld_hdlchol_w1),#LDL Cholesterol (n = 9%)
     bld_hdlchol_w1 = ifelse(bld_hdlchol_w1>1, 0, bld_hdlchol_w1),
     bld_hdlrat_w1 = ifelse(bld_hdlrat_w1<6, 0, bld_hdlrat_w1),#HDLC Ratio (n = 2%)
     bld_hdlrat_w1 = ifelse(bld_hdlrat_w1>=6, 1, bld_hdlrat_w1),
-    bld_triglyc_w1 = ifelse(bld_triglyc_w1<2, 0, bld_triglyc_w1),#Trygliceryde (FASTING OR NOT?) (n = 21%)
+    bld_triglyc_w1 = ifelse(bld_triglyc_w1<2, 0, bld_triglyc_w1),#Trglyceryde (FASTING OR NOT?) (n = 21%)
     bld_triglyc_w1 = ifelse(bld_triglyc_w1>=2, 1, bld_triglyc_w1),
     meandbpsit_w1 = rowMeans(cbind(dbp1sit_w1, dbp2sit_w1, dbp3sit_w1), na.rm = T),
     meansbpsit_w1 = rowMeans(cbind(sbp1sit_w1, sbp2sit_w1, sbp3sit_w1), na.rm = T),
@@ -134,26 +134,26 @@ reverselone1 <- LBC$lonely_w1
 LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code loneliness w1
 
 
-ggplot(LBC1936, aes(lonely_w1, totalrisk_w1))+#SOME ARE REVERSE CODED?
+
+ggplot(LBC1936, aes(meandbpsit_w1, meansbpsit_w1))+#SOME ARE REVERSE CODED?
   geom_point()+
   geom_smooth(method="glm")
 
 
-table(LBC1936$lonely_w1, LBC1936$totalrisk_w1, useNA = "ifany")%>%
+table(LBC1936$meandbpsit_w1, LBC1936$meansbpsit_w1, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
 
-
 #biomarker model wave 1 outcomes regressed on wave 1 loneliness
-biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (livealn_w1 + phyactiv_w1) + hiqual_w1 + sex, LBC1936)
+biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (phyactiv_w1 + hadstot_w1 + livealn_w1) + hiqual_w1 + sex, LBC1936)
 summary(biomodel_w1)
 
 ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
   geom_point() +
   geom_smooth(method=lm)
 
-biomodelbi_w1 <- glm(outcome_w1 ~ lonely_w1 * (hadstot_w1 + livealn_w1) + phyactiv_w1 + hiqual_w1,
+biomodelbi_w1 <- glm(outcome_w1 ~ lonely_w1  * (phyactiv_w1 + hadstot_w1 + livealn_w1) + hiqual_w1 + sex,
                   LBC1936, family = binomial(link = "logit"))
 summary(biomodelbi_w1)
 
@@ -173,11 +173,11 @@ ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
   geom_smooth(method="lm", col = "red")
 
 
-visreg(biomodelbi_w1, "lonely_w1", gg = T, scale = "response")+
+visreg(biomodel_w1, "lonely_w1", by = "phyactiv_w1", gg = T, scale = "response")+
          labs(y = "Prob (Self-Report Chronic Condition)",
               x = "Loneliness",
               subtitle = "controlling for dep/anx, living alone, sex",
-              caption = "source: LBC1936",
+              caption = "source: LBC1936 - wave 1",
               title = "Relationship of Loneliness and Chronic Conditions")
 
 
@@ -224,7 +224,69 @@ ggplot(LBC1936, aes(x=eurlonely_w2,y=ageyrs_death))+
 plot_model(modelmort_w1, type = "slope")
 tab_model(modelselfbi)
 
-
+summary(LBC1936$hmsonum_w1)
 
 
 #hadstot_w2 + livealn_w2 + hiqual_w1 + sex + agedays_w2 + phyactiv_w1 + hmsonum_w1 + eaaq3_w2
+
+
+#SEM 
+
+semmodel_w1 <- '
+
+#cholesterol
+choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
+
+#cardiovascular disease
+cardio =~ bld_crprot_w1 + cvdhist_w1
+
+#blood pressure
+bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
+
+
+#diabetes
+diab =~ bld_hba1c_w1 + diab_w1
+
+#strokes
+stroke =~ stroke_mask_w2
+
+#dementia
+dementia =~ dementia_code
+
+#chronic health index 
+risk =~ choles + cardio + bp + diab + dementia + stroke
+
+risk ~ c*lonely_w1
+risk ~ livealn_w1
+risk ~ hiqual_w1
+risk ~ sex
+
+risk ~ b*phyactiv_w1
+
+phyactiv_w1 ~ a*lonely_w1
+
+
+#Indirect
+ind:=a*b
+
+#Total
+Total:=c+a*b
+
+
+'
+
+sem_model_w1 <- sem(semmodel_w1, LBC1936, 
+                    missing = 'FIML')
+summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+
+semPaths(sem_model_w1, what='paths')
+modindices(sem_model_w1, sort = T)
+
+
+summary(LBC1936$phyactiv_w1)
+
+
+varTable(sem_model_w1)
+
+
+summary(LBC1936$bld_choles_w1)
