@@ -37,8 +37,7 @@ semPaths(modelfitcholes, what='path')
 modindices(modelfitcholes, sort = T)
 
 modelbp <-'
-bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
-'
+bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1'
 modelfitbp <- cfa(modelbp, LBC1936, std.lv = T)
 summary(modelfitbp, fit = T, standardized = T)
 modindices(modelfitbp, sort = T)
@@ -103,3 +102,6 @@ modindices(sem_model_w1, sort = T)
 
 
 cor.test(LBC1936$dement_w1, LBC1936$dementia_code)
+
+
+
