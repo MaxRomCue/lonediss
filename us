@@ -21,8 +21,8 @@ hist(as.numeric(USoc$i_health))
 
 
 kable(USoc %>% # getting data 
-  group_by(hba1c) %>% # grouping by age_stage
-  filter(!is.na(hba1c)) %>%
+  group_by(omsysval) %>% # grouping by age_stage
+  filter(!is.na(omsysval)) %>%
   summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
   kable_styling()
@@ -97,6 +97,7 @@ US <- i_indresp %>%
   i_finnow = ifelse(i_finnow<0, NA, i_finnow),
   i_hhsize = ifelse(i_hhsize>2, 2, i_hhsize),
   i_sf12pcs_dv = ifelse(i_sf12pcs_dv<0, NA, i_sf12pcs_dv),
+  i_sf12mcs_dv = ifelse(i_sf12mcs_dv<0, NA, i_sf12mcs_dv),
   lonely = rowMeans(cbind(i_sclonely, i_scisolate, i_scleftout, i_sclackcom), na.rm = T),
   lonely = ifelse(lonely<0, NA, lonely),
   
@@ -148,7 +149,6 @@ ggplot(US, aes(x=i_sclonely,y=i_sf12pcs_dv))+
 
 
 plot_model(biomodel, type = "diag")
-?plot_model
 tab_model(biomodel)
 
 
@@ -288,6 +288,7 @@ USoc <- US %>%
   )
   
 
+
 #model
 modelself <- lm(selfreporttotal ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex + i_finnow, USoc)
 summary(modelself)
@@ -309,67 +310,90 @@ USoc$i_mday <- scale(USoc$i_mday)
 USoc$i_vday <- scale(USoc$i_vday)
 USoc$i_dvage <- scale(USoc$i_dvage)
 USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
+USoc$i_sf12mcs_dv <- scale(USoc$i_sf12mcs_dv)
 
-
+?scale
 
 semmodel <- '
 
-#cholesterol
-choles =~ chol + hdl + trig  + hchipot
+#cvd
+choles =~ chol + hdl + trig + hscrp + hccor
 
-#cardiovascular disease
-cardio =~ hscrp + hcheart + hccor
 
 #blood pressure
-bp =~ omdiaval + omsysval + hcbp + hchypert
+bp =~ omdiaval + omsysval + hcbp
 
 #diabetes
 diab =~ hba1c + hcdiab
 
-#stroke
-stroke =~ hcstro
+#chronic health index (higher values is having worse outcomes)
+risk =~ choles + bp + diab
 
-#chronic health index 
-risk =~ choles + cardio + bp + diab + stroke
-
-#physical activity
+#physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
 
+#self report (higher values is having better outcomes)
+self =~ i_sf12pcs_dv + i_health + i_sclfsato + i_sf12mcs_dv
 
-#loneliness
+#loneliness (higher values is being more lonely)
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 #Direct
-risk ~ c*lone
+risk ~ c2*lone
 risk ~ i_hhsize
 risk ~ i_finnow
 risk ~ i_dvage
-risk ~ i_sf12pcs_dv
-
-
-
 risk ~ b2*physical
 
+self ~ c1*lone
+self ~ i_hhsize
+self ~ i_finnow
+self ~ i_dvage
+self ~ b1*physical
 
-physical ~ a2*lone
-i_sf12pcs_dv ~ lone
+risk ~~ self
+
+
+physical~a2*lone
 
 
 
 #Indirect
 ind2:=a2*b2
 
-
 #Total
-Total2:=c+a2*b2
+TotalSelf:=c1+a2*b1
+TotalBio:=c2+a2*b2
+
+Total:=TotalSelf + TotalBio
+
+
+# ModIndices
+i_sf12pcs_dv ~~ i_health
+lone  ~   i_finnow
+i_sf12pcs_dv ~~ i_sf12mcs_dv
+omdiaval ~~     omsysval
 '
+
 sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
                     missing = 'FIML')
 summary(sem_model, fit.measures = T, standardized =T, ci = T)
 
-semPaths(sem_model, what='mod')
+semPaths(sem_model, intercept = FALSE, whatLabel = "std",
+         residuals = TRUE, exoCov = FALSE)
 modindices(sem_model, sort = T)
 
 
 varTable(sem_model) 
+
+
+
+#CFA
+modelbp <-'
+bp =~ omdiaval + omsysval + hcbp
+'
+modelfitbp <- cfa(modelbp, USoc, std.lv = T)
+summary(modelfitbp, fit = T, standardized = T)
+modindices(modelfitbp, sort = T)
+semPaths(modelfitbp, what="paths")
