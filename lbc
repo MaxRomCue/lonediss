@@ -235,10 +235,10 @@ summary(LBC1936$hmsonum_w1)
 semmodel_w1 <- '
 
 #cholesterol
-choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1
+choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1 + bld_crprot_w1 + cvdhist_w1
 
 #cardiovascular disease
-cardio =~ bld_crprot_w1 + cvdhist_w1
+#cardio =~ bld_crprot_w1 + cvdhist_w1
 
 #blood pressure
 bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
@@ -254,7 +254,7 @@ stroke =~ stroke_mask_w2
 dementia =~ dementia_code
 
 #chronic health index 
-risk =~ choles + cardio + bp + diab + dementia + stroke
+risk =~ choles + bp + diab + dementia + stroke
 
 risk ~ c*lonely_w1
 risk ~ livealn_w1
