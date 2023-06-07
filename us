@@ -135,7 +135,7 @@ summary(biomodelbi)
 modelqol <- lm(i_sf12pcs_dv ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize + i_dvage + i_sex  + i_finnow, US)
 summary(modelqol)
 
-modelhealth <- glm(i_health ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
+modelhealth <- lm(i_health ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
                    family = binomial(link = "logit"))
 summary(modelhealth)
 
@@ -290,7 +290,7 @@ USoc <- US %>%
 
 
 #model
-modelself <- lm(selfreporttotal ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex + i_finnow, USoc)
+modelself <- lm(selfreporttotal ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize +  + i_dvage + i_sex + i_finnow, USoc)
 summary(modelself)
 
 modelselfbi <- glm(selfoutcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, USoc,
@@ -343,12 +343,14 @@ risk ~ c2*lone
 risk ~ i_hhsize
 risk ~ i_finnow
 risk ~ i_dvage
+risk ~ i_sex
 risk ~ b2*physical
 
 self ~ c1*lone
 self ~ i_hhsize
 self ~ i_finnow
 self ~ i_dvage
+self ~ i_sex
 self ~ b1*physical
 
 risk ~~ self
