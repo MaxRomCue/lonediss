@@ -27,7 +27,7 @@ LBCtest <- LBC1936 %>%
 colnames(LBC1936)
 
 kable(LBC1936 %>% # getting data 
-        group_by(bld_choles_w1) %>% # grouping by age_stage
+        group_by(meansbpsit_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -43,7 +43,6 @@ LBC1936 %>%
 ggpairs(LBCtest, title="All variables")
 
 
-rowSums
 LBC1936 <- 
   LBC %>%
   mutate(
@@ -224,7 +223,6 @@ ggplot(LBC1936, aes(x=eurlonely_w2,y=ageyrs_death))+
 plot_model(modelmort_w1, type = "slope")
 tab_model(modelselfbi)
 
-summary(LBC1936$hmsonum_w1)
 
 
 #hadstot_w2 + livealn_w2 + hiqual_w1 + sex + agedays_w2 + phyactiv_w1 + hmsonum_w1 + eaaq3_w2
@@ -251,7 +249,7 @@ diab =~ bld_hba1c_w1 + diab_w1
 stroke =~ stroke_mask_w2
 
 #dementia
-dementia =~ dementia_code
+dementia =~ dementia_code            
 
 #chronic health index 
 risk =~ choles + bp + diab + dementia + stroke
