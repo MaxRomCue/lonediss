@@ -18,7 +18,7 @@ LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MR
 
 summary(LBC)
 
-ggplot(LBC1936, aes(x=dement_w1)) + geom_bar(position="dodge")
+ggplot(LBC1936, aes(x=dbp2sit_w1)) + geom_bar(position="dodge")
 hist(as.numeric(LBC1936$dement_w1))
 
 LBCtest <- LBC1936 %>%
@@ -66,6 +66,20 @@ LBC1936 <-
     bld_hba1c_w1 = ifelse(bld_hba1c_w1<6.5, 0, bld_hba1c_w1),
     bld_hba1c_w1 = ifelse(bld_hba1c_w1>=6.5, 1, bld_hba1c_w1),#diabetes (n = 12%)
     
+    dbp1sit_w1 = ifelse(dbp1sit_w1<90, 0, dbp1sit_w1),
+    dbp1sit_w1 = ifelse(dbp1sit_w1>=90, 1, dbp1sit_w1),
+    dbp2sit_w1 = ifelse(dbp2sit_w1<90, 0, dbp2sit_w1),
+    dbp2sit_w1 = ifelse(dbp2sit_w1>=90, 1, dbp2sit_w1),
+    dbp3sit_w1 = ifelse(dbp3sit_w1<90, 0, dbp3sit_w1),
+    dbp3sit_w1 = ifelse(dbp3sit_w1>=90, 1, dbp3sit_w1),
+    sbp1sit_w1 = ifelse(sbp1sit_w1<140, 0, sbp1sit_w1),
+    sbp1sit_w1 = ifelse(sbp1sit_w1>=140, 1, sbp1sit_w1),
+    sbp2sit_w1 = ifelse(sbp2sit_w1<140, 0, sbp2sit_w1),
+    sbp2sit_w1 = ifelse(sbp2sit_w1>=140, 1, sbp2sit_w1),
+    sbp3sit_w1 = ifelse(sbp3sit_w1<140, 0, sbp3sit_w1),
+    sbp3sit_w1 = ifelse(sbp3sit_w1>=140, 1, sbp3sit_w1),
+    
+
     # dementia... what to do?
     dementia_code = ifelse(dementia_code>1, NA, dementia_code),
     age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis>72, 0, age_at_dementia_diagnosis),
@@ -90,6 +104,7 @@ LBC1936 <-
     meansbpsit_w2 = ifelse(meansbpsit_w2>=140, 1, meansbpsit_w2),
     bld_hba1c_DCCT_w2 = ifelse(bld_hba1c_DCCT_w2<6.0, 0, bld_hba1c_DCCT_w2),
     bld_hba1c_DCCT_w2 = ifelse(bld_hba1c_DCCT_w2>=6.0, 1, bld_hba1c_DCCT_w2),#diabetes (n = 16%)
+  
     
     
     #covar wave 1
@@ -239,17 +254,22 @@ choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_trigl
 #cardio =~ bld_crprot_w1 + cvdhist_w1
 
 #blood pressure
-bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
+#bp =~ meandbpsit_w1 + meansbpsit_w1 + hibp_w1
 
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1
+
+bp =~ dbp + sbp + hibp_w1
 
 #diabetes
 diab =~ bld_hba1c_w1 + diab_w1
 
 #strokes
-stroke =~ stroke_mask_w2
+stroke =~ stroke_mask_w2 + stroke_w1
 
 #dementia
-dementia =~ dementia_code            
+dementia =~ dementia_code          
 
 #chronic health index 
 risk =~ choles + bp + diab + dementia + stroke
@@ -271,6 +291,11 @@ ind:=a*b
 Total:=c+a*b
 
 
+
+#Modindices
+hichol_w1 ~~     cvdhist_w1
+hichol_w1 ~~        hibp_w1
+cvdhist_w1 ~~        hibp_w1
 '
 
 sem_model_w1 <- sem(semmodel_w1, LBC1936, 
@@ -285,6 +310,3 @@ summary(LBC1936$phyactiv_w1)
 
 
 varTable(sem_model_w1)
-
-
-summary(LBC1936$bld_choles_w1)
