@@ -16,7 +16,7 @@ x_indresp <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xindresp_ns.sav")
 
 
 #plots
-ggplot(USoc, aes(x=i_health)) + geom_bar(position="dodge")
+ggplot(USoc, aes(x=c_big5n_dv)) + geom_bar(position="dodge")
 hist(as.numeric(USoc$i_health))
 
 
@@ -37,7 +37,6 @@ i_indresp %>%
 table(USoc$i_health, USoc$totalrisk, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
-
 
 
 
@@ -119,7 +118,6 @@ table(US$i_sex, US$i_sclonely, useNA = "ifany")%>%
 
 
 
-
 #Biomarker Model wave 2-3 outcomes regressed on wave 9 loneliness
 
 biomodel <- lm(totalrisk ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize + i_dvage + i_sex + i_finnow, US)
@@ -152,10 +150,6 @@ plot_model(biomodel, type = "diag")
 tab_model(biomodel)
 
 
-
-
-
-
 # Self Report Conditions
 
 a_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/a_indresp.sav")
@@ -180,7 +174,7 @@ a_ind <- a_indresp %>%
   )
 
 c_ind <- c_indresp %>%
-  select(c(pidp, c_closenum, c_hcond17, c_hcond3, c_hcond4, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
+  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond3, c_hcond4, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
   mutate(
     c_hcond17 = ifelse(c_hcond17<0, NA_real_, c_hcond17),
     c_hcond3 = ifelse(c_hcond3<0, NA, c_hcond3),
@@ -191,6 +185,8 @@ c_ind <- c_indresp %>%
     c_hcond14 = ifelse(c_hcond14<0, NA, c_hcond14),
     c_hcond16 = ifelse(c_hcond16<0, NA, c_hcond16),
     c_closenum = ifelse(c_closenum<0, NA, c_closenum),
+    c_big5n_dv = ifelse(c_big5n_dv<0, NA, c_big5n_dv),
+    
   )
 
 d_ind <- d_indresp %>%
@@ -281,13 +277,12 @@ USoc <- US %>%
     hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16), na.rm = T),
     hcbp = ifelse(hcbp>1, 1, hcbp),
     
-    
     #outcomes index
     selfreporttotal = hcdep + hcheart + hccor + hcstro + hchypert + hchipot + hcdiab + hcbp, 
     selfoutcome = ifelse(selfreporttotal>0, 1, selfreporttotal)#binary
   )
   
-
+summary(USoc$c_big5n_dv)
 
 #model
 modelself <- lm(selfreporttotal ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize +  + i_dvage + i_sex + i_finnow, USoc)
@@ -311,14 +306,14 @@ USoc$i_vday <- scale(USoc$i_vday)
 USoc$i_dvage <- scale(USoc$i_dvage)
 USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
 USoc$i_sf12mcs_dv <- scale(USoc$i_sf12mcs_dv)
+USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
 
-?scale
+
 
 semmodel <- '
 
 #cvd
 choles =~ chol + hdl + trig + hscrp + hccor
-
 
 #blood pressure
 bp =~ omdiaval + omsysval + hcbp
@@ -355,10 +350,7 @@ self ~ b1*physical
 
 risk ~~ self
 
-
 physical~a2*lone
-
-
 
 #Indirect
 ind2:=a2*b2
@@ -374,12 +366,18 @@ Total:=TotalSelf + TotalBio
 i_sf12pcs_dv ~~ i_health
 lone  ~   i_finnow
 i_sf12pcs_dv ~~ i_sf12mcs_dv
-omdiaval ~~     omsysval
+i_sclonely ~~  i_sclackcom
+
+#self ~~ c_big5n_dv
+hcbp ~~ hccor
+hcbp ~~ hcdiab
+hcdiab ~~ hccor
 '
 
 sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
-                    missing = 'FIML')
+                    missing = 'fiml')
+
 summary(sem_model, fit.measures = T, standardized =T, ci = T)
 
 semPaths(sem_model, intercept = FALSE, whatLabel = "std",
