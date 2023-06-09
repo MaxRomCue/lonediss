@@ -312,8 +312,11 @@ USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
 
 semmodel <- '
 
+#choles
+choles =~ chol + hdl + trig 
+
 #cvd
-choles =~ chol + hdl + trig + hscrp + hccor
+cvd =~ hscrp 
 
 #blood pressure
 bp =~ omdiaval + omsysval + hcbp
@@ -322,7 +325,7 @@ bp =~ omdiaval + omsysval + hcbp
 diab =~ hba1c + hcdiab
 
 #chronic health index (higher values is having worse outcomes)
-risk =~ choles + bp + diab
+risk =~ choles + bp + diab + cvd
 
 #physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
@@ -363,10 +366,10 @@ Total:=TotalSelf + TotalBio
 
 
 # ModIndices
-i_sf12pcs_dv ~~ i_health
-lone  ~   i_finnow
-i_sf12pcs_dv ~~ i_sf12mcs_dv
-i_sclonely ~~  i_sclackcom
+#i_sf12pcs_dv ~~ i_health
+#lone  ~   i_finnow
+#i_sf12pcs_dv ~~ i_sf12mcs_dv
+#i_sclonely ~~  i_sclackcom
 
 #self ~~ c_big5n_dv
 hcbp ~~ hccor
