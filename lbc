@@ -18,16 +18,16 @@ LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MR
 
 summary(LBC)
 
-ggplot(LBC1936, aes(x=dbp2sit_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC1936$dement_w1))
+ggplot(LBC, aes(x=bld_hdlrat_w1)) + geom_bar(position="dodge")
+hist(as.numeric(LBC1936$bld_hdlrat_w1))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
 
 colnames(LBC1936)
 
-kable(LBC1936 %>% # getting data 
-        group_by(meansbpsit_w1) %>% # grouping by age_stage
+kable(LBC %>% # getting data 
+        group_by(bld_choles_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -55,7 +55,7 @@ LBC1936 <-
     bld_hdlchol_w1 = ifelse(bld_hdlchol_w1>1, 0, bld_hdlchol_w1),
     bld_hdlrat_w1 = ifelse(bld_hdlrat_w1<6, 0, bld_hdlrat_w1),#HDLC Ratio (n = 2%)
     bld_hdlrat_w1 = ifelse(bld_hdlrat_w1>=6, 1, bld_hdlrat_w1),
-    bld_triglyc_w1 = ifelse(bld_triglyc_w1<2, 0, bld_triglyc_w1),#Trglyceryde (FASTING OR NOT?) (n = 21%)
+    bld_triglyc_w1 = ifelse(bld_triglyc_w1<2, 0, bld_triglyc_w1),#Trygliceryde (n = 21%)
     bld_triglyc_w1 = ifelse(bld_triglyc_w1>=2, 1, bld_triglyc_w1),
     meandbpsit_w1 = rowMeans(cbind(dbp1sit_w1, dbp2sit_w1, dbp3sit_w1), na.rm = T),
     meansbpsit_w1 = rowMeans(cbind(sbp1sit_w1, sbp2sit_w1, sbp3sit_w1), na.rm = T),
@@ -248,7 +248,7 @@ tab_model(modelselfbi)
 semmodel_w1 <- '
 
 #cholesterol
-choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + hichol_w1 + bld_triglyc_w1 + bld_crprot_w1 + cvdhist_w1
+choles =~ bld_choles_w1 + bld_hdlchol_w1 + bld_hdlrat_w1 + bld_triglyc_w1 + hichol_w1
 
 #cardiovascular disease
 #cardio =~ bld_crprot_w1 + cvdhist_w1
@@ -266,13 +266,13 @@ bp =~ dbp + sbp + hibp_w1
 diab =~ bld_hba1c_w1 + diab_w1
 
 #strokes
-stroke =~ stroke_mask_w2 + stroke_w1
+stroke =~ stroke_mask_w2
 
 #dementia
 dementia =~ dementia_code          
 
 #chronic health index 
-risk =~ choles + bp + diab + dementia + stroke
+risk =~ choles + bp + diab + dementia + stroke 
 
 risk ~ c*lonely_w1
 risk ~ livealn_w1
@@ -295,7 +295,10 @@ Total:=c+a*b
 #Modindices
 hichol_w1 ~~     cvdhist_w1
 hichol_w1 ~~        hibp_w1
+hichol_w1 ~~ diab_w1
 cvdhist_w1 ~~        hibp_w1
+hibp_w1 ~~ diab_w1
+cvdhist_w1 ~~ diab_w1
 '
 
 sem_model_w1 <- sem(semmodel_w1, LBC1936, 
@@ -306,7 +309,9 @@ semPaths(sem_model_w1, what='paths')
 modindices(sem_model_w1, sort = T)
 
 
-summary(LBC1936$phyactiv_w1)
+summary(LBC1936$dementia_code)
 
 
 varTable(sem_model_w1)
+
+lavInspect(sem_model_w1, "theta") 
