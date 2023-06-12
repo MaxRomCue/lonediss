@@ -1,0 +1,49 @@
+#SEM - US
+
+#CFAs
+
+modelcholes <- '
+cholesbio =~ chol + trig + hdl
+choleself =~ hcheat + hcang + hcheart + hccor
+choles =~ cholesbio + choleself
+
+physical =~ i_vday + i_mday + i_wday
+
+
+choles ~ i_dvage
+choles ~ physical
+
+'
+modelfitcholes <- cfa(modelcholes, USoc, std.lv = T)
+summary(modelfitcholes, fit = T, standardized = T)
+modindices(modelfitcholes, sort = T)
+
+
+modelbp <-'
+bp =~ omdiaval + omsysval + hcbp
+
+
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+physical =~ i_vday + i_mday + i_wday
+
+bp ~ i_dvage
+bp ~ i_sex 
+bp ~ lone
+bp ~ i_finnow
+bp ~ physical
+bp ~ i_hhsize
+
+'
+modelfitbp <- cfa(modelbp, USoc, std.lv = T)
+summary(modelfitbp, fit = T, standardized = T)
+modindices(modelfitbp, sort = T)
+
+
+
+modelcardio <-'cardiobio=~ hscrp + chol
+cardiorep =~ hcheat + hcheart + hccor
+cardio =~ cardiobio + cardiorep
+' 
+modelfitcardio <- cfa(modelcardio, USoc, std.lv = T)
+summary(modelfitcardio, fit = T, standardized = T)
+modindices(modelfitcardio, sort = T)
