@@ -16,25 +16,42 @@ x_indresp <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xindresp_ns.sav")
 
 
 #plots
-ggplot(USoc, aes(x=c_big5n_dv)) + geom_bar(position="dodge")
-hist(as.numeric(USoc$i_health))
+ggplot(x_indresp, aes(x=omdiaval)) + geom_bar(position="dodge")
+
+
+
+hist(as.numeric(USoc$trig))
+
+hist(as.numeric(blood$w_hyper1))
+
+
+
+
+kable(x_indresp %>% # getting data 
+    group_by(omdiaval>=90) %>% # grouping by age_stage
+    filter(!is.na(omdiaval)) %>%
+    filter(omdiaval>0)%>%
+      summarise(cnt = n()) %>% # counting how many by group of age_stage
+  mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
+  kable_styling()
+
 
 
 kable(USoc %>% # getting data 
-  group_by(omsysval) %>% # grouping by age_stage
-  filter(!is.na(omsysval)) %>%
-  summarise(cnt = n()) %>% # counting how many by group of age_stage
-  mutate(props = round(cnt / sum(cnt), 2)), n= 31) %>%# getting frequency
+        group_by(omdiaval) %>% # grouping by age_stage
+        filter(!is.na(omdiaval)) %>%
+        summarise(cnt = n()) %>% # counting how many by group of age_stage
+        mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
 
-summary(i_indresp$i_hcond_main)
+summary(x_indresp$hyper1)
 
-i_indresp %>%
-  select(contains("mai"))%>%
+x_indresp %>%
+  select(contains("hyper1"))%>%
   multi.hist()
 
 
-table(USoc$i_health, USoc$totalrisk, useNA = "ifany")%>%
+table(USoc$hscrp, blood$hscrp, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
@@ -65,6 +82,8 @@ bioUS <-
     hba1c = ifelse(hba1c<48, 0, hba1c),
     hba1c = ifelse(hba1c>=48, 1, hba1c),#diabetes (n = 6%) - less than LBC
   )
+
+
 
 bpUS <- x_indresp %>%
   select(c(pidp,omdiaval,omsysval)) %>%
@@ -112,9 +131,6 @@ US <- i_indresp %>%
   
 
 #NEED TO DETERMINE WHICH VARIABLES TO USE (SELF-REPORT, WHICH)
-table(US$i_sex, US$i_sclonely, useNA = "ifany")%>%
-  kable() %>%
-  kable_styling()
 
 
 
@@ -141,7 +157,7 @@ modellife <- lm(i_sclfsato ~ i_sclonely * (i_hhsize + i_sf12pcs_dv) + i_sf12mcs_
 summary(modellife)
 
 #Model Graphs
-ggplot(US, aes(x=i_sclonely,y=i_sf12pcs_dv))+
+ggplot(USoc, aes(x=omdiaval,y=omsysval))+
   geom_point() +
   geom_smooth(method=lm)
 
@@ -161,11 +177,14 @@ g_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/g_indresp.sav"
 h_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/h_indresp.sav")
 
 a_ind <- a_indresp %>%
-  select(c(pidp, a_hcond17, a_hcond3, a_hcond4, a_hcond7, a_hcond9, a_hcond10, a_hcond14, a_hcond16))%>%
+  select(c(pidp, a_hcond17, a_hcond2, a_hcond3, a_hcond4, a_hcond5, a_hcond6, a_hcond7, a_hcond9, a_hcond10, a_hcond14, a_hcond16))%>%
   mutate(
     a_hcond17 = ifelse(a_hcond17<0, NA_real_, a_hcond17),
+    a_hcond2 = ifelse(a_hcond2<0, NA, a_hcond2),
     a_hcond3 = ifelse(a_hcond3<0, NA, a_hcond3),
     a_hcond4 = ifelse(a_hcond4<0, NA, a_hcond4),
+    a_hcond5 = ifelse(a_hcond5<0, NA, a_hcond5),
+    a_hcond6 = ifelse(a_hcond6<0, NA, a_hcond6),
     a_hcond7 = ifelse(a_hcond7<0, NA, a_hcond7),
     a_hcond9 = ifelse(a_hcond9<0, NA, a_hcond9),
     a_hcond10 = ifelse(a_hcond10<0, NA, a_hcond10),
@@ -174,11 +193,14 @@ a_ind <- a_indresp %>%
   )
 
 c_ind <- c_indresp %>%
-  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond3, c_hcond4, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
+  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond2, c_hcond3, c_hcond4, c_hcond5, c_hcond6, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
   mutate(
     c_hcond17 = ifelse(c_hcond17<0, NA_real_, c_hcond17),
+    c_hcond2 = ifelse(c_hcond2<0, NA, c_hcond2),
     c_hcond3 = ifelse(c_hcond3<0, NA, c_hcond3),
     c_hcond4 = ifelse(c_hcond4<0, NA, c_hcond4),
+    c_hcond5 = ifelse(c_hcond5<0, NA, c_hcond5),
+    c_hcond6 = ifelse(c_hcond6<0, NA, c_hcond6),
     c_hcond7 = ifelse(c_hcond7<0, NA, c_hcond7),
     c_hcond9 = ifelse(c_hcond9<0, NA, c_hcond9),
     c_hcond10 = ifelse(c_hcond10<0, NA, c_hcond10),
@@ -190,11 +212,14 @@ c_ind <- c_indresp %>%
   )
 
 d_ind <- d_indresp %>%
-  select(c(pidp, d_hcond17, d_hcond3, d_hcond4, d_hcond7, d_hcond9, d_hcond10, d_hcond14, d_hcond16))%>%
+  select(c(pidp, d_hcond17, d_hcond2, d_hcond3, d_hcond4, d_hcond5, d_hcond6, d_hcond7, d_hcond9, d_hcond10, d_hcond14, d_hcond16))%>%
   mutate(
     d_hcond17 = ifelse(d_hcond17<0, NA_real_, d_hcond17),
+    d_hcond2 = ifelse(d_hcond2<0, NA, d_hcond2),
     d_hcond3 = ifelse(d_hcond3<0, NA, d_hcond3),
     d_hcond4 = ifelse(d_hcond4<0, NA, d_hcond4),
+    d_hcond5 = ifelse(d_hcond5<0, NA, d_hcond5),
+    d_hcond6 = ifelse(d_hcond6<0, NA, d_hcond6),
     d_hcond7 = ifelse(d_hcond7<0, NA, d_hcond7),
     d_hcond9 = ifelse(d_hcond9<0, NA, d_hcond9),
     d_hcond10 = ifelse(d_hcond10<0, NA, d_hcond10),
@@ -203,11 +228,14 @@ d_ind <- d_indresp %>%
   )
 
 e_ind <- e_indresp %>%
-  select(c(pidp, e_hcond17, e_hcond3, e_hcond4, e_hcond7, e_hcond9, e_hcond10, e_hcond14, e_hcond16))%>%
+  select(c(pidp, e_hcond17, e_hcond2, e_hcond3, e_hcond4, e_hcond5, e_hcond6, e_hcond7, e_hcond9, e_hcond10, e_hcond14, e_hcond16))%>%
   mutate(
     e_hcond17 = ifelse(e_hcond17<0, NA_real_, e_hcond17),
+    e_hcond2 = ifelse(e_hcond2<0, NA, e_hcond2),
     e_hcond3 = ifelse(e_hcond3<0, NA, e_hcond3),
     e_hcond4 = ifelse(e_hcond4<0, NA, e_hcond4),
+    e_hcond5 = ifelse(e_hcond5<0, NA, e_hcond5),
+    e_hcond6 = ifelse(e_hcond6<0, NA, e_hcond6),
     e_hcond7 = ifelse(e_hcond7<0, NA, e_hcond7),
     e_hcond9 = ifelse(e_hcond9<0, NA, e_hcond9),
     e_hcond10 = ifelse(e_hcond10<0, NA, e_hcond10),
@@ -216,11 +244,15 @@ e_ind <- e_indresp %>%
   )
 
 f_ind <- f_indresp %>%
-  select(c(pidp, f_hcond17, f_hcond3, f_hcond4, f_hcond7, f_hcond9, f_hcond10, f_hcond14, f_hcond16))%>%
+  select(c(pidp, f_hcond17, f_hcond2, f_hcond3, f_hcond4, f_hcond5, f_hcond6, f_hcond7, f_hcond9, f_hcond10, f_hcond14, f_hcond16))%>%
   mutate(
     f_hcond17 = ifelse(f_hcond17<0, NA_real_, f_hcond17),
+    f_hcond2 = ifelse(f_hcond2<0, NA, f_hcond2),
     f_hcond3 = ifelse(f_hcond3<0, NA, f_hcond3),
     f_hcond4 = ifelse(f_hcond4<0, NA, f_hcond4),
+    f_hcond5 = ifelse(f_hcond5<0, NA, f_hcond5),
+    f_hcond6 = ifelse(f_hcond6<0, NA, f_hcond6),
+    
     f_hcond7 = ifelse(f_hcond7<0, NA, f_hcond7),
     f_hcond9 = ifelse(f_hcond9<0, NA, f_hcond9),
     f_hcond10 = ifelse(f_hcond10<0, NA, f_hcond10),
@@ -229,11 +261,14 @@ f_ind <- f_indresp %>%
   )
 
 g_ind <- g_indresp %>%
-  select(c(pidp, g_hcond17, g_hcond3, g_hcond4, g_hcond7, g_hcond9, g_hcond10, g_hcond14, g_hcond16))%>%
+  select(c(pidp, g_hcond17, g_hcond2, g_hcond3, g_hcond4, g_hcond5, g_hcond6, g_hcond7, g_hcond9, g_hcond10, g_hcond14, g_hcond16))%>%
   mutate(
     g_hcond17 = ifelse(g_hcond17<0, NA_real_, g_hcond17),
+    g_hcond2 = ifelse(g_hcond2<0, NA, g_hcond2),
     g_hcond3 = ifelse(g_hcond3<0, NA, g_hcond3),
     g_hcond4 = ifelse(g_hcond4<0, NA, g_hcond4),
+    g_hcond5 = ifelse(g_hcond5<0, NA, g_hcond5),
+    g_hcond6 = ifelse(g_hcond6<0, NA, g_hcond6),
     g_hcond7 = ifelse(g_hcond7<0, NA, g_hcond7),
     g_hcond9 = ifelse(g_hcond9<0, NA, g_hcond9),
     g_hcond10 = ifelse(g_hcond10<0, NA, g_hcond10),
@@ -242,11 +277,14 @@ g_ind <- g_indresp %>%
   )
 
 h_ind <- h_indresp %>%
-  select(c(pidp, h_hcond17, h_hcond3, h_hcond4, h_hcond7, h_hcond9, h_hcond10, h_hcond14, h_hcond16))%>%
+  select(c(pidp, h_hcond17, h_hcond2, h_hcond3, h_hcond4, h_hcond5, h_hcond6, h_hcond7, h_hcond9, h_hcond10, h_hcond14, h_hcond16))%>%
   mutate(
     h_hcond17 = ifelse(h_hcond17<0, NA_real_, h_hcond17),
+    h_hcond2 = ifelse(h_hcond2<0, NA, h_hcond2),
     h_hcond3 = ifelse(h_hcond3<0, NA, h_hcond3),
     h_hcond4 = ifelse(h_hcond4<0, NA, h_hcond4),
+    h_hcond5 = ifelse(h_hcond5<0, NA, h_hcond5),
+    h_hcond6 = ifelse(h_hcond6<0, NA, h_hcond6),
     h_hcond7 = ifelse(h_hcond7<0, NA, h_hcond7),
     h_hcond9 = ifelse(h_hcond9<0, NA, h_hcond9),
     h_hcond10 = ifelse(h_hcond10<0, NA, h_hcond10),
@@ -264,17 +302,22 @@ USoc <- US %>%
   full_join(g_ind)%>%
   full_join(h_ind)%>%
   mutate(
-    hcdep = rowSums(cbind(a_hcond17, c_hcond17, d_hcond17, e_hcond17, f_hcond17, g_hcond17, h_hcond7), na.rm = T),
+    hcdep = rowSums(cbind(a_hcond17, c_hcond17, d_hcond17, e_hcond17, f_hcond17, g_hcond17, h_hcond7), na.rm = T),#depression
     hcdep = ifelse(hcdep>1, 1, hcdep),
-    hcheart = rowSums(cbind(a_hcond3, c_hcond3, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3), na.rm = T),
-    hccor = rowSums(cbind(a_hcond4, c_hcond4, d_hcond4, e_hcond4, f_hcond4, g_hcond4, h_hcond4), na.rm = T),
-    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond7, e_hcond7, f_hcond7, g_hcond7, h_hcond7), na.rm = T),
-    hchypert = rowSums(cbind(a_hcond9, c_hcond9, d_hcond9, e_hcond9, f_hcond9, g_hcond9, h_hcond9), na.rm = T),
+    hcharth = rowSums(cbind(a_hcond2, c_hcond2, d_hcond2, e_hcond2, f_hcond2, g_hcond2, h_hcond2), na.rm = T),#Arthritis
+    hcharth = ifelse(hcharth>1, 1, hcharth),
+    hcheart = rowSums(cbind(a_hcond3, c_hcond3, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3), na.rm = T), #Congestive heart failure	
+    hccor = rowSums(cbind(a_hcond4, c_hcond4, d_hcond4, e_hcond4, f_hcond4, g_hcond4, h_hcond4), na.rm = T),#Coronary heart disease	
+    hcang = rowSums(cbind(a_hcond5, c_hcond5, d_hcond5, e_hcond5, f_hcond5, g_hcond5, h_hcond5), na.rm = T),#Angina	
+    hcang = ifelse(hcang>1, 1, hcang),
+    hcheat = rowSums(cbind(a_hcond6, c_hcond6, d_hcond6, e_hcond6, f_hcond6, g_hcond6, h_hcond6), na.rm = T),#Heart Attack
+    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond7, e_hcond7, f_hcond7, g_hcond7, h_hcond7), na.rm = T),#strokes
+    hchypert = rowSums(cbind(a_hcond9, c_hcond9, d_hcond9, e_hcond9, f_hcond9, g_hcond9, h_hcond9), na.rm = T),#Hyperthyroidism 
     hchipot = rowSums(cbind(a_hcond10, c_hcond10, d_hcond10, e_hcond10, f_hcond10, g_hcond10, h_hcond10), na.rm = T),
-    hchipot = ifelse(hchipot>1, 1, hchipot),
-    hcdiab = rowSums(cbind(a_hcond14, c_hcond14, d_hcond14, e_hcond14, f_hcond14, g_hcond14, h_hcond14), na.rm = T),
+    hchipot = ifelse(hchipot>1, 1, hchipot),#Hypothyroidism 
+    hcdiab = rowSums(cbind(a_hcond14, c_hcond14, d_hcond14, e_hcond14, f_hcond14, g_hcond14, h_hcond14), na.rm = T),#diabetes
     hcdiab = ifelse(hcdiab>1, 1, hcdiab),
-    hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16), na.rm = T),
+    hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16), na.rm = T),#high bp
     hcbp = ifelse(hcbp>1, 1, hcbp),
     
     #outcomes index
@@ -282,7 +325,7 @@ USoc <- US %>%
     selfoutcome = ifelse(selfreporttotal>0, 1, selfreporttotal)#binary
   )
   
-summary(USoc$c_big5n_dv)
+summary(USoc$scprtr5n1)
 
 #model
 modelself <- lm(selfreporttotal ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize +  + i_dvage + i_sex + i_finnow, USoc)
@@ -295,10 +338,13 @@ summary(modelselfbi)
 plot_model(modelself, type = "slope")
 
 
+summary(USoc$hcheat)
+
+
+
 #SEM
 
 #Need to Scale? Age...physical activity
-varTable(sem_model)
 
 USoc$i_wday <- scale(USoc$i_wday)
 USoc$i_mday <- scale(USoc$i_mday)
@@ -313,10 +359,10 @@ USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
 semmodel <- '
 
 #choles
-choles =~ chol + hdl + trig 
+choles =~ chol + hdl + trig + hchypert
 
 #cvd
-cvd =~ hscrp 
+cvd =~ hscrp
 
 #blood pressure
 bp =~ omdiaval + omsysval + hcbp
@@ -331,7 +377,11 @@ risk =~ choles + bp + diab + cvd
 physical =~ i_vday + i_mday + i_wday
 
 #self report (higher values is having better outcomes)
-self =~ i_sf12pcs_dv + i_health + i_sclfsato + i_sf12mcs_dv
+
+selfphy =~ i_sf12pcs_dv + i_health
+selfmen =~ i_sclfsato + i_sf12mcs_dv
+
+self =~ selfphy + selfmen
 
 #loneliness (higher values is being more lonely)
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
@@ -380,6 +430,8 @@ hcdiab ~~ hccor
 sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
                     missing = 'fiml')
+
+#fiml.x???
 
 summary(sem_model, fit.measures = T, standardized =T, ci = T)
 
