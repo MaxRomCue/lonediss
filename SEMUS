@@ -3,15 +3,24 @@
 #CFAs
 
 modelcholes <- '
-cholesbio =~ chol + trig + hdl
-choleself =~ hcheat + hcang + hcheart + hccor
+cholesbio =~ chol + hdl + trig 
+choleself =~ hcheat + hcang  + hccor
 choles =~ cholesbio + choleself
 
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 physical =~ i_vday + i_mday + i_wday
 
 
 choles ~ i_dvage
+choles ~ i_sex
+choles ~ lone
+choles ~ i_finnow
 choles ~ physical
+choles ~ i_hhsize
+
+
+#added co-variances
+#lone  ~    i_finnow
 
 '
 modelfitcholes <- cfa(modelcholes, USoc, std.lv = T)
@@ -20,8 +29,9 @@ modindices(modelfitcholes, sort = T)
 
 
 modelbp <-'
-bp =~ omdiaval + omsysval + hcbp
-
+bpbio =~ omdiaval + omsysval
+bpself =~ hcbp 
+bp =~ bpbio + bpself
 
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 physical =~ i_vday + i_mday + i_wday
@@ -40,10 +50,113 @@ modindices(modelfitbp, sort = T)
 
 
 
-modelcardio <-'cardiobio=~ hscrp + chol
-cardiorep =~ hcheat + hcheart + hccor
-cardio =~ cardiobio + cardiorep
+modelcardio <-'
+cardiobio=~ hscrp 
+cardiorep =~ hcharth
+cardio =~ cardiobio + cardiorep 
+
+
+physical =~ i_vday + i_mday + i_wday
+
+cardio ~ i_dvage
+cardio ~ i_sex 
+cardio ~ physical
+
 ' 
 modelfitcardio <- cfa(modelcardio, USoc, std.lv = T)
 summary(modelfitcardio, fit = T, standardized = T)
 modindices(modelfitcardio, sort = T)
+
+
+modeldiab <-'
+diab =~ hba1c + hcdiab
+
+
+
+
+physical =~ i_vday + i_mday + i_wday
+
+diab ~ i_dvage
+diab ~ i_sex 
+diab ~ physical
+'
+modelfitdiab <- cfa(modeldiab, USoc, std.lv = T)
+summary(modelfitdiab, fit = T, standardized = T)
+modindices(modelfitcardio, sort = T)
+
+
+semmodel <- '
+
+cholesbio =~ chol + hdl + trig 
+choleself =~ hcheat + hcang  + hccor
+choles =~ cholesbio + choleself
+
+bpbio =~ omdiaval + omsysval
+bpself =~ hcbp 
+bp =~ bpbio + bpself
+
+cardio =~ hscrp + hcharth 
+
+diab =~ hba1c + hcdiab
+
+#chronic health index (higher values is having worse outcomes)
+risk =~ choles + bp + cardio + diab
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
+#physical activity (higher values is exercising more)
+physical =~ i_vday + i_mday + i_wday
+
+#self report (higher values is having better outcomes)
+self =~ i_sclfsato + i_sf12mcs_dv
+
+
+risk ~ i_dvage
+risk ~ i_sex
+risk ~ c2*lone
+risk ~ i_hhsize
+risk ~ i_finnow
+risk ~ b2*physical
+
+
+self ~ i_dvage
+self ~ i_sex
+self ~ c1*lone
+self ~ i_hhsize
+self ~ i_finnow
+self ~ b1*physical
+
+
+#Covariances
+#lone ~~ choles
+#lone ~~ bp
+#lone ~~ cardio
+#lone ~~ diab
+
+physical~a2*lone
+
+#Indirect
+ind2:=a2*b2
+
+#Total
+TotalSelf:=c1+a2*b1
+TotalBio:=c2+a2*b2
+
+Total:=TotalSelf + TotalBio
+
+#MODINDICES
+lone  ~     i_finnow
+i_sclonely ~~  i_sclackcom
+i_sex  ~     physical
+
+'
+
+
+sem_model <- sem(semmodel, USoc, 
+                 #se = 'bootstrap',
+                 missing = 'fiml')
+summary(sem_model, fit.measures = T, standardized =T, ci = T)
+modindices(sem_model, sort = T)
+
+#What to do with CHOL?... changes a lot depending if including lone with co-variances with individual conditions 
