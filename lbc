@@ -16,10 +16,10 @@ library(semPlot)
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_06APR2023.sav")
 
 
-summary(LBC)
+summary(LBC$age_at_dementia_diagnosis)
 
-ggplot(LBC, aes(x=bld_hdlrat_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC1936$bld_hdlrat_w1))
+ggplot(LBC1936, aes(x=hibp_w1)) + geom_bar(position="dodge")
+hist(as.numeric(LBC1936$age_at_dementia_diagnosis_w1))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
@@ -27,7 +27,13 @@ LBCtest <- LBC1936 %>%
 colnames(LBC1936)
 
 kable(LBC %>% # getting data 
-        group_by(bld_choles_w1) %>% # grouping by age_stage
+        group_by(bld_crprot_w1>=3) %>% # grouping by age_stage
+        summarise(cnt = n()) %>% # counting how many by group of age_stage
+        mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
+  kable_styling()
+
+kable(LBC1936 %>% # getting data 
+        group_by(bld_crprot_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -36,8 +42,8 @@ ggplot(LBC1936, aes(meandbpsit_w1, meandbpsit_w1))+
   geom_pointrange()
 
 
-LBC1936 %>%
-  select(contains("mean"))%>%
+LBC %>%
+  select(contains("age_at"))%>%
   multi.hist()
 
 ggpairs(LBCtest, title="All variables")
@@ -47,8 +53,8 @@ LBC1936 <-
   LBC %>%
   mutate(
     #outcomes wave 1
-    bld_crprot_w1 = ifelse(bld_crprot_w1<=3, 0, bld_crprot_w1),#CRP Cardiovascular (n = 48%)
-    bld_crprot_w1 = ifelse(bld_crprot_w1>3, 1, bld_crprot_w1),
+    bld_crprot_w1 = ifelse(bld_crprot_w1<3, 0, bld_crprot_w1),#CRP Cardiovascular (n = 53%)
+    bld_crprot_w1 = ifelse(bld_crprot_w1>=3, 1, bld_crprot_w1),
     bld_choles_w1 = ifelse(bld_choles_w1<=6.2, 0, bld_choles_w1),#Total Cholesterol (n = 23%)
     bld_choles_w1 = ifelse(bld_choles_w1>6.2, 1, bld_choles_w1),
     bld_hdlchol_w1 = ifelse(bld_hdlchol_w1<=1, 1, bld_hdlchol_w1),#LDL Cholesterol (n = 9%)
@@ -82,8 +88,8 @@ LBC1936 <-
 
     # dementia... what to do?
     dementia_code = ifelse(dementia_code>1, NA, dementia_code),
-    age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis>72, 0, age_at_dementia_diagnosis),
     age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis<=72, 1, age_at_dementia_diagnosis),
+    age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis>72, 0, age_at_dementia_diagnosis),
     age_at_dementia_diagnosis_w2 = ifelse(age_at_dementia_diagnosis>75, 0, age_at_dementia_diagnosis),
     age_at_dementia_diagnosis_w2 = ifelse(age_at_dementia_diagnosis<=75, 1, age_at_dementia_diagnosis),
 
@@ -149,12 +155,12 @@ LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code
 
 
 
-ggplot(LBC1936, aes(meandbpsit_w1, meansbpsit_w1))+#SOME ARE REVERSE CODED?
+ggplot(LBC1936, aes(hibp_w1, meandbpsit_w2))+#SOME ARE REVERSE CODED?
   geom_point()+
   geom_smooth(method="glm")
 
 
-table(LBC1936$meandbpsit_w1, LBC1936$meansbpsit_w1, useNA = "ifany")%>%
+table(LBC1936$hibp_w1, LBC1936$meandbpsit_w1, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
@@ -315,3 +321,5 @@ summary(LBC1936$dementia_code)
 varTable(sem_model_w1)
 
 lavInspect(sem_model_w1, "theta") 
+
+summary(LBC1936$age_at_dementia_diagnosis_w1)
