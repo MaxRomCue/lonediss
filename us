@@ -16,21 +16,21 @@ x_indresp <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xindresp_ns.sav")
 
 
 #plots
-ggplot(x_indresp, aes(x=omdiaval)) + geom_bar(position="dodge")
+ggplot(USoc, aes(x=hscrp)) + geom_bar(position="dodge")
 
 
 
-hist(as.numeric(USoc$trig))
+hist(as.numeric(USoc$hscrp))
 
-hist(as.numeric(blood$w_hyper1))
-
-
+hist(as.numeric(blood$trig))
 
 
-kable(x_indresp %>% # getting data 
-    group_by(omdiaval>=90) %>% # grouping by age_stage
-    filter(!is.na(omdiaval)) %>%
-    filter(omdiaval>0)%>%
+
+
+kable(blood %>% # getting data 
+    group_by(trig>=2) %>% # grouping by age_stage
+    filter(!is.na(trig)) %>%
+    filter(trig>0)%>%
       summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
@@ -38,8 +38,8 @@ kable(x_indresp %>% # getting data
 
 
 kable(USoc %>% # getting data 
-        group_by(omdiaval) %>% # grouping by age_stage
-        filter(!is.na(omdiaval)) %>%
+        group_by(hscrp) %>% # grouping by age_stage
+        filter(!is.na(hscrp)) %>%
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
@@ -67,8 +67,8 @@ bioUS <-
     #This is on blood data
     hscrp = ifelse(hscrp>10, NA, hscrp),#Assigning NAs
     hscrp = ifelse(hscrp<0, NA, hscrp),
-    hscrp = ifelse(hscrp<=3, 0, hscrp),#CRP Cardiovascular (n = 22%) - less than LBC
-    hscrp = ifelse(hscrp>3, 1, hscrp),
+    hscrp = ifelse(hscrp<3, 0, hscrp),#CRP Cardiovascular (n = 23%) - much less than LBC
+    hscrp = ifelse(hscrp>=3, 1, hscrp),
     chol = ifelse(chol<0, NA, chol),#NA
     chol = ifelse(chol<=6.2, 0, chol),#Total Cholesterol (n = 22%) - almost same as LBC
     chol = ifelse(chol>6.2, 1, chol),
@@ -175,35 +175,46 @@ e_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/e_indresp.sav"
 f_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/f_indresp.sav")
 g_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/g_indresp.sav")
 h_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/h_indresp.sav")
+i_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/i_indresp.sav")
+
 
 a_ind <- a_indresp %>%
-  select(c(pidp, a_hcond17, a_hcond2, a_hcond3, a_hcond4, a_hcond5, a_hcond6, a_hcond7, a_hcond9, a_hcond10, a_hcond14, a_hcond16))%>%
+  select(c(pidp, a_hcond17, a_hcond1, a_hcond2, a_hcond3, a_hcond4, a_hcond5, a_hcond6, a_hcond7, a_hcond8, a_hcond9, a_hcond10, a_hcond11, a_hcond12, a_hcond14, a_hcond16))%>%
   mutate(
     a_hcond17 = ifelse(a_hcond17<0, NA_real_, a_hcond17),
+    a_hcond1 = ifelse(a_hcond1<0, NA, a_hcond1),
     a_hcond2 = ifelse(a_hcond2<0, NA, a_hcond2),
     a_hcond3 = ifelse(a_hcond3<0, NA, a_hcond3),
     a_hcond4 = ifelse(a_hcond4<0, NA, a_hcond4),
     a_hcond5 = ifelse(a_hcond5<0, NA, a_hcond5),
     a_hcond6 = ifelse(a_hcond6<0, NA, a_hcond6),
     a_hcond7 = ifelse(a_hcond7<0, NA, a_hcond7),
+    a_hcond8 = ifelse(a_hcond8<0, NA, a_hcond8),
     a_hcond9 = ifelse(a_hcond9<0, NA, a_hcond9),
     a_hcond10 = ifelse(a_hcond10<0, NA, a_hcond10),
+    a_hcond11 = ifelse(a_hcond11<0, NA, a_hcond11),
+    a_hcond12 = ifelse(a_hcond12<0, NA, a_hcond12),
     a_hcond14 = ifelse(a_hcond14<0, NA, a_hcond14),
     a_hcond16 = ifelse(a_hcond16<0, NA, a_hcond16)
   )
 
 c_ind <- c_indresp %>%
-  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond2, c_hcond3, c_hcond4, c_hcond5, c_hcond6, c_hcond7, c_hcond9, c_hcond10, c_hcond14, c_hcond16))%>%
+  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond1, c_hcond2, c_hcond3, c_hcond4, c_hcond5, c_hcond6, c_hcond7, c_hcond8, c_hcond9, c_hcond10, c_hcond11, c_hcond12, c_hcond14, c_hcond16))%>%
   mutate(
     c_hcond17 = ifelse(c_hcond17<0, NA_real_, c_hcond17),
+    c_hcond1 = ifelse(c_hcond1<0, NA, c_hcond1),
     c_hcond2 = ifelse(c_hcond2<0, NA, c_hcond2),
     c_hcond3 = ifelse(c_hcond3<0, NA, c_hcond3),
     c_hcond4 = ifelse(c_hcond4<0, NA, c_hcond4),
     c_hcond5 = ifelse(c_hcond5<0, NA, c_hcond5),
     c_hcond6 = ifelse(c_hcond6<0, NA, c_hcond6),
     c_hcond7 = ifelse(c_hcond7<0, NA, c_hcond7),
+    c_hcond8 = ifelse(c_hcond8<0, NA, c_hcond8),
     c_hcond9 = ifelse(c_hcond9<0, NA, c_hcond9),
     c_hcond10 = ifelse(c_hcond10<0, NA, c_hcond10),
+    c_hcond11 = ifelse(c_hcond11<0, NA, c_hcond11),
+    c_hcond12 = ifelse(c_hcond12<0, NA, c_hcond12),
+    
     c_hcond14 = ifelse(c_hcond14<0, NA, c_hcond14),
     c_hcond16 = ifelse(c_hcond16<0, NA, c_hcond16),
     c_closenum = ifelse(c_closenum<0, NA, c_closenum),
@@ -212,84 +223,125 @@ c_ind <- c_indresp %>%
   )
 
 d_ind <- d_indresp %>%
-  select(c(pidp, d_hcond17, d_hcond2, d_hcond3, d_hcond4, d_hcond5, d_hcond6, d_hcond7, d_hcond9, d_hcond10, d_hcond14, d_hcond16))%>%
+  select(c(pidp, d_hcond17, d_hcond1, d_hcond2, d_hcond3, d_hcond4, d_hcond5, d_hcond6, d_hcond7, d_hcond8, d_hcond9, d_hcond10, d_hcond11, d_hcond12, d_hcond14, d_hcond16))%>%
   mutate(
     d_hcond17 = ifelse(d_hcond17<0, NA_real_, d_hcond17),
+    d_hcond1 = ifelse(d_hcond1<0, NA, d_hcond1),
     d_hcond2 = ifelse(d_hcond2<0, NA, d_hcond2),
     d_hcond3 = ifelse(d_hcond3<0, NA, d_hcond3),
     d_hcond4 = ifelse(d_hcond4<0, NA, d_hcond4),
     d_hcond5 = ifelse(d_hcond5<0, NA, d_hcond5),
     d_hcond6 = ifelse(d_hcond6<0, NA, d_hcond6),
     d_hcond7 = ifelse(d_hcond7<0, NA, d_hcond7),
+    d_hcond8 = ifelse(d_hcond8<0, NA, d_hcond8),
     d_hcond9 = ifelse(d_hcond9<0, NA, d_hcond9),
     d_hcond10 = ifelse(d_hcond10<0, NA, d_hcond10),
+    d_hcond11 = ifelse(d_hcond11<0, NA, d_hcond11),
+    d_hcond12 = ifelse(d_hcond12<0, NA, d_hcond12),
+    
     d_hcond14 = ifelse(d_hcond14<0, NA, d_hcond14),
     d_hcond16 = ifelse(d_hcond16<0, NA, d_hcond16)
   )
 
 e_ind <- e_indresp %>%
-  select(c(pidp, e_hcond17, e_hcond2, e_hcond3, e_hcond4, e_hcond5, e_hcond6, e_hcond7, e_hcond9, e_hcond10, e_hcond14, e_hcond16))%>%
+  select(c(pidp, e_hcond17, e_hcond1, e_hcond2, e_hcond3, e_hcond4, e_hcond5, e_hcond6, e_hcond7, e_hcond8,e_hcond9, e_hcond10, e_hcond11, e_hcond12, e_hcond14, e_hcond16))%>%
   mutate(
     e_hcond17 = ifelse(e_hcond17<0, NA_real_, e_hcond17),
+    e_hcond1 = ifelse(e_hcond1<0, NA, e_hcond1),
     e_hcond2 = ifelse(e_hcond2<0, NA, e_hcond2),
     e_hcond3 = ifelse(e_hcond3<0, NA, e_hcond3),
     e_hcond4 = ifelse(e_hcond4<0, NA, e_hcond4),
     e_hcond5 = ifelse(e_hcond5<0, NA, e_hcond5),
     e_hcond6 = ifelse(e_hcond6<0, NA, e_hcond6),
     e_hcond7 = ifelse(e_hcond7<0, NA, e_hcond7),
+    e_hcond8 = ifelse(e_hcond8<0, NA, e_hcond8),
     e_hcond9 = ifelse(e_hcond9<0, NA, e_hcond9),
     e_hcond10 = ifelse(e_hcond10<0, NA, e_hcond10),
+    e_hcond11 = ifelse(e_hcond11<0, NA, e_hcond11),
+    e_hcond12 = ifelse(e_hcond12<0, NA, e_hcond12),
+    
     e_hcond14 = ifelse(e_hcond14<0, NA, e_hcond14),
     e_hcond16 = ifelse(e_hcond16<0, NA, e_hcond16)
   )
 
 f_ind <- f_indresp %>%
-  select(c(pidp, f_hcond17, f_hcond2, f_hcond3, f_hcond4, f_hcond5, f_hcond6, f_hcond7, f_hcond9, f_hcond10, f_hcond14, f_hcond16))%>%
+  select(c(pidp, f_hcond17, f_hcond1, f_hcond2, f_hcond3, f_hcond4, f_hcond5, f_hcond6, f_hcond7, f_hcond8, f_hcond9, f_hcond10, f_hcond11, f_hcond12, f_hcond14, f_hcond16))%>%
   mutate(
     f_hcond17 = ifelse(f_hcond17<0, NA_real_, f_hcond17),
+    f_hcond1 = ifelse(f_hcond1<0, NA, f_hcond1),
     f_hcond2 = ifelse(f_hcond2<0, NA, f_hcond2),
     f_hcond3 = ifelse(f_hcond3<0, NA, f_hcond3),
     f_hcond4 = ifelse(f_hcond4<0, NA, f_hcond4),
     f_hcond5 = ifelse(f_hcond5<0, NA, f_hcond5),
     f_hcond6 = ifelse(f_hcond6<0, NA, f_hcond6),
-    
     f_hcond7 = ifelse(f_hcond7<0, NA, f_hcond7),
+    f_hcond8 = ifelse(f_hcond8<0, NA, f_hcond8),
     f_hcond9 = ifelse(f_hcond9<0, NA, f_hcond9),
     f_hcond10 = ifelse(f_hcond10<0, NA, f_hcond10),
+    f_hcond11 = ifelse(f_hcond11<0, NA, f_hcond11),
+    f_hcond12 = ifelse(f_hcond12<0, NA, f_hcond12),
     f_hcond14 = ifelse(f_hcond14<0, NA, f_hcond14),
     f_hcond16 = ifelse(f_hcond16<0, NA, f_hcond16)
   )
 
 g_ind <- g_indresp %>%
-  select(c(pidp, g_hcond17, g_hcond2, g_hcond3, g_hcond4, g_hcond5, g_hcond6, g_hcond7, g_hcond9, g_hcond10, g_hcond14, g_hcond16))%>%
+  select(c(pidp, g_hcond17, g_hcond1, g_hcond2, g_hcond3, g_hcond4, g_hcond5, g_hcond6, g_hcond7, g_hcond8,g_hcond9, g_hcond10, g_hcond11, g_hcond12, g_hcond14, g_hcond16))%>%
   mutate(
     g_hcond17 = ifelse(g_hcond17<0, NA_real_, g_hcond17),
+    g_hcond1 = ifelse(g_hcond1<0, NA, g_hcond1),
     g_hcond2 = ifelse(g_hcond2<0, NA, g_hcond2),
     g_hcond3 = ifelse(g_hcond3<0, NA, g_hcond3),
     g_hcond4 = ifelse(g_hcond4<0, NA, g_hcond4),
     g_hcond5 = ifelse(g_hcond5<0, NA, g_hcond5),
     g_hcond6 = ifelse(g_hcond6<0, NA, g_hcond6),
     g_hcond7 = ifelse(g_hcond7<0, NA, g_hcond7),
+    g_hcond8 = ifelse(g_hcond8<0, NA, g_hcond8),
     g_hcond9 = ifelse(g_hcond9<0, NA, g_hcond9),
     g_hcond10 = ifelse(g_hcond10<0, NA, g_hcond10),
+    g_hcond11 = ifelse(g_hcond11<0, NA, g_hcond11),
+    g_hcond12 = ifelse(g_hcond12<0, NA, g_hcond12),
     g_hcond14 = ifelse(g_hcond14<0, NA, g_hcond14),
     g_hcond16 = ifelse(g_hcond16<0, NA, g_hcond16)
   )
 
 h_ind <- h_indresp %>%
-  select(c(pidp, h_hcond17, h_hcond2, h_hcond3, h_hcond4, h_hcond5, h_hcond6, h_hcond7, h_hcond9, h_hcond10, h_hcond14, h_hcond16))%>%
+  select(c(pidp, h_hcond17, h_hcond1, h_hcond2, h_hcond3, h_hcond4, h_hcond5, h_hcond6, h_hcond7, h_hcond8, h_hcond9, h_hcond10, h_hcond11, h_hcond12, h_hcond14, h_hcond16))%>%
   mutate(
     h_hcond17 = ifelse(h_hcond17<0, NA_real_, h_hcond17),
+    h_hcond1 = ifelse(h_hcond1<0, NA, h_hcond1),
     h_hcond2 = ifelse(h_hcond2<0, NA, h_hcond2),
     h_hcond3 = ifelse(h_hcond3<0, NA, h_hcond3),
     h_hcond4 = ifelse(h_hcond4<0, NA, h_hcond4),
     h_hcond5 = ifelse(h_hcond5<0, NA, h_hcond5),
     h_hcond6 = ifelse(h_hcond6<0, NA, h_hcond6),
     h_hcond7 = ifelse(h_hcond7<0, NA, h_hcond7),
+    h_hcond8 = ifelse(h_hcond8<0, NA, h_hcond8),
     h_hcond9 = ifelse(h_hcond9<0, NA, h_hcond9),
     h_hcond10 = ifelse(h_hcond10<0, NA, h_hcond10),
+    h_hcond11 = ifelse(h_hcond11<0, NA, h_hcond11),
+    h_hcond12 = ifelse(h_hcond12<0, NA, h_hcond12),
     h_hcond14 = ifelse(h_hcond14<0, NA, h_hcond14),
     h_hcond16 = ifelse(h_hcond16<0, NA, h_hcond16)
+  )
+
+i_ind <- i_indresp %>%
+  select(c(pidp, i_hcond17, i_hcond1, i_hcond2, i_hcond3, i_hcond4, i_hcond5, i_hcond6, i_hcond7, i_hcond8, i_hcond9, i_hcond10, i_hcond11, i_hcond12, i_hcond14, i_hcond16))%>%
+  mutate(
+    i_hcond17 = ifelse(i_hcond17<0, NA_real_, i_hcond17),
+    i_hcond1 = ifelse(i_hcond1<0, NA, i_hcond1),
+    i_hcond2 = ifelse(i_hcond2<0, NA, i_hcond2),
+    i_hcond3 = ifelse(i_hcond3<0, NA, i_hcond3),
+    i_hcond4 = ifelse(i_hcond4<0, NA, i_hcond4),
+    i_hcond5 = ifelse(i_hcond5<0, NA, i_hcond5),
+    i_hcond6 = ifelse(i_hcond6<0, NA, i_hcond6),
+    i_hcond7 = ifelse(i_hcond7<0, NA, i_hcond7),
+    i_hcond8 = ifelse(i_hcond8<0, NA, i_hcond8),
+    i_hcond9 = ifelse(i_hcond9<0, NA, i_hcond9),
+    i_hcond10 = ifelse(i_hcond10<0, NA, i_hcond10),
+    i_hcond11 = ifelse(i_hcond11<0, NA, i_hcond11),
+    i_hcond12 = ifelse(i_hcond12<0, NA, i_hcond12),
+    i_hcond14 = ifelse(i_hcond14<0, NA, i_hcond14),
+    i_hcond16 = ifelse(i_hcond16<0, NA, i_hcond16)
   )
 
 
@@ -301,23 +353,29 @@ USoc <- US %>%
   full_join(f_ind)%>%
   full_join(g_ind)%>%
   full_join(h_ind)%>%
+  full_join(i_ind)%>%
   mutate(
-    hcdep = rowSums(cbind(a_hcond17, c_hcond17, d_hcond17, e_hcond17, f_hcond17, g_hcond17, h_hcond7), na.rm = T),#depression
+    hcdep = rowSums(cbind(a_hcond17, c_hcond17, d_hcond17, e_hcond17, f_hcond17, g_hcond17, h_hcond7, i_hcond7), na.rm = T),#depression
     hcdep = ifelse(hcdep>1, 1, hcdep),
-    hcharth = rowSums(cbind(a_hcond2, c_hcond2, d_hcond2, e_hcond2, f_hcond2, g_hcond2, h_hcond2), na.rm = T),#Arthritis
+    hcasth = rowSums(cbind(a_hcond1, c_hcond1, d_hcond1, e_hcond1, f_hcond1, g_hcond1, h_hcond1, i_hcond1), na.rm = T),#Asthma
+    hcasth = ifelse(hcasth>1, 1, hcasth),
+    hcharth = rowSums(cbind(a_hcond2, c_hcond2, d_hcond2, e_hcond2, f_hcond2, g_hcond2, h_hcond2, i_hcond2), na.rm = T),#Arthritis
     hcharth = ifelse(hcharth>1, 1, hcharth),
-    hcheart = rowSums(cbind(a_hcond3, c_hcond3, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3), na.rm = T), #Congestive heart failure	
-    hccor = rowSums(cbind(a_hcond4, c_hcond4, d_hcond4, e_hcond4, f_hcond4, g_hcond4, h_hcond4), na.rm = T),#Coronary heart disease	
-    hcang = rowSums(cbind(a_hcond5, c_hcond5, d_hcond5, e_hcond5, f_hcond5, g_hcond5, h_hcond5), na.rm = T),#Angina	
+    hcheart = rowSums(cbind(a_hcond3, c_hcond3, d_hcond3, e_hcond3, f_hcond3, g_hcond3, h_hcond3, i_hcond3), na.rm = T), #Congestive heart failure	
+    hccor = rowSums(cbind(a_hcond4, c_hcond4, d_hcond4, e_hcond4, f_hcond4, g_hcond4, h_hcond4, i_hcond4), na.rm = T),#Coronary heart disease	
+    hcang = rowSums(cbind(a_hcond5, c_hcond5, d_hcond5, e_hcond5, f_hcond5, g_hcond5, h_hcond5, i_hcond5), na.rm = T),#Angina	
     hcang = ifelse(hcang>1, 1, hcang),
-    hcheat = rowSums(cbind(a_hcond6, c_hcond6, d_hcond6, e_hcond6, f_hcond6, g_hcond6, h_hcond6), na.rm = T),#Heart Attack
-    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond7, e_hcond7, f_hcond7, g_hcond7, h_hcond7), na.rm = T),#strokes
-    hchypert = rowSums(cbind(a_hcond9, c_hcond9, d_hcond9, e_hcond9, f_hcond9, g_hcond9, h_hcond9), na.rm = T),#Hyperthyroidism 
-    hchipot = rowSums(cbind(a_hcond10, c_hcond10, d_hcond10, e_hcond10, f_hcond10, g_hcond10, h_hcond10), na.rm = T),
+    hcheat = rowSums(cbind(a_hcond6, c_hcond6, d_hcond6, e_hcond6, f_hcond6, g_hcond6, h_hcond6, i_hcond6), na.rm = T),#Heart Attack
+    hcstro = rowSums(cbind(a_hcond7, c_hcond7, d_hcond7, e_hcond7, f_hcond7, g_hcond7, h_hcond7, i_hcond7), na.rm = T),#strokes
+    hcemphy = rowSums(cbind(a_hcond8, c_hcond8, d_hcond8, e_hcond8, f_hcond8, g_hcond8, h_hcond8, i_hcond8), na.rm = T),#Emphysema
+    hchypert = rowSums(cbind(a_hcond9, c_hcond9, d_hcond9, e_hcond9, f_hcond9, g_hcond9, h_hcond9, h_hcond11), na.rm = T),#Hyperthyroidism 
+    hchipot = rowSums(cbind(a_hcond10, c_hcond10, d_hcond10, e_hcond10, f_hcond10, g_hcond10, h_hcond10, h_hcond11), na.rm = T),
     hchipot = ifelse(hchipot>1, 1, hchipot),#Hypothyroidism 
-    hcdiab = rowSums(cbind(a_hcond14, c_hcond14, d_hcond14, e_hcond14, f_hcond14, g_hcond14, h_hcond14), na.rm = T),#diabetes
+    hcbron = rowSums(cbind(a_hcond11, c_hcond11, d_hcond11, e_hcond11, f_hcond11, g_hcond11, h_hcond11, i_hcond11), na.rm = T),#Bronchitis
+    hcliver = rowSums(cbind(a_hcond12, c_hcond12, d_hcond12, e_hcond12, f_hcond12, g_hcond12, h_hcond12, i_hcond12), na.rm = T),#Liver
+    hcdiab = rowSums(cbind(a_hcond14, c_hcond14, d_hcond14, e_hcond14, f_hcond14, g_hcond14, h_hcond14, i_hcond14), na.rm = T),#diabetes
     hcdiab = ifelse(hcdiab>1, 1, hcdiab),
-    hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16), na.rm = T),#high bp
+    hcbp = rowSums(cbind(a_hcond16, c_hcond16, d_hcond16, e_hcond16, f_hcond16, g_hcond16, h_hcond16, i_hcond16), na.rm = T),#high bp
     hcbp = ifelse(hcbp>1, 1, hcbp),
     
     #outcomes index
@@ -325,7 +383,7 @@ USoc <- US %>%
     selfoutcome = ifelse(selfreporttotal>0, 1, selfreporttotal)#binary
   )
   
-summary(USoc$scprtr5n1)
+summary(USoc$hcbp)
 
 #model
 modelself <- lm(selfreporttotal ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize +  + i_dvage + i_sex + i_finnow, USoc)
@@ -338,7 +396,7 @@ summary(modelselfbi)
 plot_model(modelself, type = "slope")
 
 
-summary(USoc$hcheat)
+summary(USoc$hccor)
 
 
 
@@ -352,7 +410,9 @@ USoc$i_vday <- scale(USoc$i_vday)
 USoc$i_dvage <- scale(USoc$i_dvage)
 USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
 USoc$i_sf12mcs_dv <- scale(USoc$i_sf12mcs_dv)
+USoc$i_sclfsato <- scale(USoc$i_sclfsato)
 USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
+
 
 
 
