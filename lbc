@@ -13,13 +13,15 @@ library(car)
 library(lavaan)
 library(semPlot)
 
-LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_06APR2023.sav")
+LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_14JUN2023.sav")
 
+
+summary(LBC$)
 
 summary(LBC$age_at_dementia_diagnosis)
 
-ggplot(LBC1936, aes(x=hibp_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC1936$age_at_dementia_diagnosis_w1))
+ggplot(LBC1936, aes(x=cvdhist_w1)) + geom_bar(position="dodge")
+hist(as.numeric(LBC$bld_crprot_w1))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
@@ -32,13 +34,15 @@ kable(LBC %>% # getting data
         mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
 
+
+
 kable(LBC1936 %>% # getting data 
         group_by(bld_crprot_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
 
-ggplot(LBC1936, aes(meandbpsit_w1, meandbpsit_w1))+
+ggplot(LBC1936, aes(dbp1sit_w1, hibp_w1))+
   geom_pointrange()
 
 
@@ -53,7 +57,8 @@ LBC1936 <-
   LBC %>%
   mutate(
     #outcomes wave 1
-    bld_crprot_w1 = ifelse(bld_crprot_w1<3, 0, bld_crprot_w1),#CRP Cardiovascular (n = 53%)
+    bld_crprot_w1 = ifelse(bld_crprot_w1>10, NA, bld_crprot_w1),
+    bld_crprot_w1 = ifelse(bld_crprot_w1<3, 0, bld_crprot_w1),#CRP Cardiovascular (n = 42%)
     bld_crprot_w1 = ifelse(bld_crprot_w1>=3, 1, bld_crprot_w1),
     bld_choles_w1 = ifelse(bld_choles_w1<=6.2, 0, bld_choles_w1),#Total Cholesterol (n = 23%)
     bld_choles_w1 = ifelse(bld_choles_w1>6.2, 1, bld_choles_w1),
@@ -96,12 +101,12 @@ LBC1936 <-
     #outcomes wave 2
     bld_crprot_w2 = ifelse(bld_crprot_w2<=3, 0, bld_crprot_w2),#CRP Cardiovascular (n = 34%)
     bld_crprot_w2 = ifelse(bld_crprot_w2>3, 1, bld_crprot_w2),
-    #bld_choles_w2 = ifelse(bld_choles_w2<=5, 0, bld_choles_w2),#Total Cholesterol 
-    #bld_choles_w2 = ifelse(bld_choles_w2>5, 1, bld_choles_w2),
-    #bld_hdlchol_w2 = ifelse(bld_hdlchol_w2<=1, 1, bld_hdlchol_w2),#LDL Cholesterol 
-    #bld_hdlchol_w2 = ifelse(bld_hdlchol_w2>1, 0, bld_hdlchol_w2),
-    #bld_triglyc_w2 = ifelse(bld_triglyc_w2<2, 0, bld_triglyc_w2),#Trygliceryde 
-    #bld_triglyc_w2 = ifelse(bld_triglyc_w2>=2, 1, bld_triglyc_w2),
+    bld_choles_w2 = ifelse(bld_choles_w2<=6.2, 0, bld_choles_w2),#Total Cholesterol 
+    bld_choles_w2 = ifelse(bld_choles_w2>6.2, 1, bld_choles_w2),
+    bld_hdlchol_w2 = ifelse(bld_hdlchol_w2<=1, 1, bld_hdlchol_w2),#LDL Cholesterol 
+    bld_hdlchol_w2 = ifelse(bld_hdlchol_w2>1, 0, bld_hdlchol_w2),
+    bld_triglyc_w2 = ifelse(bld_triglyc_w2<2, 0, bld_triglyc_w2),#Trygliceryde 
+    bld_triglyc_w2 = ifelse(bld_triglyc_w2>=2, 1, bld_triglyc_w2),
     meandbpsit_w2 = rowMeans(cbind(dbp1sit_w2, dbp2sit_w2, dbp3sit_w2), na.rm = T),
     meansbpsit_w2 = rowMeans(cbind(sbp1sit_w2, sbp2sit_w2, sbp3sit_w2), na.rm = T),
     meandbpsit_w2 = ifelse(meandbpsit_w2<90, 0, meandbpsit_w2),#diastolic sitting (mean) (n = 9%)
@@ -119,8 +124,8 @@ LBC1936 <-
     agedays_w1 = agedays_w1/365,
     
     #covar wave 2
-    #hadstot_w2 = ifelse(hadstot_w2<8, 0, hadstot_w2),
-    #hadstot_w2 = ifelse(hadstot_w2>=8, 1, hadstot_w2),
+    hadstot_w2 = ifelse(hadstot_w2<8, 0, hadstot_w2),
+    hadstot_w2 = ifelse(hadstot_w2>=8, 1, hadstot_w2),
     agedays_w2 = agedays_w2/365,
     
     #outcomes index wave 1
@@ -135,8 +140,7 @@ LBC1936 <-
     selfreporttotal_w2 = hibp_w2 + cvdhist_w2 + hichol_w2 + dement_w2 + diab_w2 + stroke_w2, 
     selfoutcome_w2 = ifelse(selfreporttotal_w2>0, 1, selfreporttotal_w2),#binary
     
-    totalrisk_w2 = bld_crprot_w2 #+ bld_choles_w2 + bld_hdlchol_w2 + bld_triglyc_w2 
-      + meandbpsit_w2 + meansbpsit_w2 + bld_hba1c_DCCT_w2 + dementia_code + stroke_mask_w2,    # discrete
+    totalrisk_w2 = bld_crprot_w2 + bld_choles_w2 + bld_hdlchol_w2 + bld_triglyc_w2 + meandbpsit_w2 + meansbpsit_w2 + bld_hba1c_DCCT_w2 + dementia_code + stroke_mask_w2,    # discrete
     outcome_w2 = ifelse(totalrisk_w2>0, 1, totalrisk_w2)#binary
       )
 
@@ -155,18 +159,18 @@ LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code
 
 
 
-ggplot(LBC1936, aes(hibp_w1, meandbpsit_w2))+#SOME ARE REVERSE CODED?
+ggplot(LBC1936, aes(dbp3sit_w1, hibp_w1))+#SOME ARE REVERSE CODED?
   geom_point()+
   geom_smooth(method="glm")
 
 
-table(LBC1936$hibp_w1, LBC1936$meandbpsit_w1, useNA = "ifany")%>%
+table(LBC1936$hibp_w1, LBC1936$meansbpsit_w1, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
 
 #biomarker model wave 1 outcomes regressed on wave 1 loneliness
-biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (phyactiv_w1 + hadstot_w1 + livealn_w1) + hiqual_w1 + sex, LBC1936)
+biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (phyactiv_w1 + livealn_w1) + hadstot_w1 + hiqual_w1 + sex, LBC1936)
 summary(biomodel_w1)
 
 ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
@@ -179,7 +183,7 @@ summary(biomodelbi_w1)
 
 
 #biomarker model wave 2 outcomes regressed on wave 2 loneliness
-biomodel_w2 <- lm(totalrisk_w2 ~ eurlonely_w2 * (livealn_w2) + hadstot_w2 + phyactiv_w1 + hiqual_w1 + sex, LBC1936)
+biomodel_w2 <- lm(totalrisk_w2 ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1)+ eaaq3_w2 + hadstot_w2 + hiqual_w1 + sex+ hmsonum_w1, LBC1936)
 summary(biomodel_w2)
 
 biomodelbi_w2 <- glm(outcome_w2 ~ eurlonely_w2 * (livealn_w2 + eaaq3_w2) + hadstot_w2 + hiqual_w1 + sex + hmsonum_w1 + phyactiv_w1,
