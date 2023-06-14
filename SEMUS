@@ -52,7 +52,7 @@ modindices(modelfitbp, sort = T)
 
 modelcardio <-'
 cardiobio=~ hscrp 
-cardiorep =~ hcharth
+cardiorep =~ hcharth + hcstro
 cardio =~ cardiobio + cardiorep 
 
 
@@ -87,8 +87,8 @@ modindices(modelfitcardio, sort = T)
 
 semmodel <- '
 
-cholesbio =~ chol + hdl + trig 
-choleself =~ hcheat + hcang  + hccor
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
 choles =~ cholesbio + choleself
 
 bpbio =~ omdiaval + omsysval
@@ -109,7 +109,9 @@ lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 physical =~ i_vday + i_mday + i_wday
 
 #self report (higher values is having better outcomes)
-self =~ i_sclfsato + i_sf12mcs_dv
+selfphy =~ i_sf12pcs_dv + i_health 
+selfmen =~ i_sclfsato + i_sf12mcs_dv 
+self =~ selfphy + selfmen
 
 
 risk ~ i_dvage
@@ -133,6 +135,8 @@ self ~ b1*physical
 #lone ~~ bp
 #lone ~~ cardio
 #lone ~~ diab
+#self ~~ c_big5n_dv
+#risk ~~ c_big5n_dv
 
 physical~a2*lone
 
@@ -147,8 +151,6 @@ Total:=TotalSelf + TotalBio
 
 #MODINDICES
 lone  ~     i_finnow
-i_sclonely ~~  i_sclackcom
-i_sex  ~     physical
 
 '
 
