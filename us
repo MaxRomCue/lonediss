@@ -28,9 +28,9 @@ hist(as.numeric(blood$trig))
 
 
 kable(blood %>% # getting data 
-    group_by(trig>=2) %>% # grouping by age_stage
-    filter(!is.na(trig)) %>%
-    filter(trig>0)%>%
+    group_by(hscrp>=3) %>% # grouping by age_stage
+    filter(!is.na(hscrp)) %>%
+    filter(hscrp>0)%>%
       summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
@@ -398,6 +398,8 @@ plot_model(modelself, type = "slope")
 
 summary(USoc$hccor)
 
+summary(USoc$c_big5n_dv)
+
 
 
 #SEM
@@ -419,7 +421,7 @@ USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
 semmodel <- '
 
 #choles
-choles =~ chol + hdl + trig + hchypert
+choles =~ hdl + trig + hchypert
 
 #cvd
 cvd =~ hscrp
@@ -489,7 +491,7 @@ hcdiab ~~ hccor
 
 sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
-                    missing = 'fiml')
+                    missing = 'fiml.x')
 
 #fiml.x???
 
@@ -501,14 +503,3 @@ modindices(sem_model, sort = T)
 
 
 varTable(sem_model) 
-
-
-
-#CFA
-modelbp <-'
-bp =~ omdiaval + omsysval + hcbp
-'
-modelfitbp <- cfa(modelbp, USoc, std.lv = T)
-summary(modelfitbp, fit = T, standardized = T)
-modindices(modelfitbp, sort = T)
-semPaths(modelfitbp, what="paths")
