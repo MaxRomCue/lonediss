@@ -16,8 +16,6 @@ library(semPlot)
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_14JUN2023.sav")
 
 
-summary(LBC$)
-
 summary(LBC$age_at_dementia_diagnosis)
 
 ggplot(LBC1936, aes(x=cvdhist_w1)) + geom_bar(position="dodge")
@@ -37,7 +35,7 @@ kable(LBC %>% # getting data
 
 
 kable(LBC1936 %>% # getting data 
-        group_by(bld_crprot_w1) %>% # grouping by age_stage
+        group_by(hibp_w1) %>% # grouping by age_stage
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -89,6 +87,19 @@ LBC1936 <-
     sbp2sit_w1 = ifelse(sbp2sit_w1>=140, 1, sbp2sit_w1),
     sbp3sit_w1 = ifelse(sbp3sit_w1<140, 0, sbp3sit_w1),
     sbp3sit_w1 = ifelse(sbp3sit_w1>=140, 1, sbp3sit_w1),
+    
+    dbp1std_w1 = ifelse(dbp1std_w1<90, 0, dbp1std_w1),
+    dbp1std_w1 = ifelse(dbp1std_w1>=90, 1, dbp1std_w1),
+    dbp2std_w1 = ifelse(dbp2std_w1<90, 0, dbp2std_w1),
+    dbp2std_w1 = ifelse(dbp2std_w1>=90, 1, dbp2std_w1),
+    dbp3std_w1 = ifelse(dbp3std_w1<90, 0, dbp3std_w1),
+    dbp3std_w1 = ifelse(dbp3std_w1>=90, 1, dbp3std_w1),
+    sbp1std_w1 = ifelse(sbp1std_w1<140, 0, sbp1std_w1),
+    sbp1std_w1 = ifelse(sbp1std_w1>=140, 1, sbp1std_w1),
+    sbp2std_w1 = ifelse(sbp2std_w1<140, 0, sbp2std_w1),
+    sbp2std_w1 = ifelse(sbp2std_w1>=140, 1, sbp2std_w1),
+    sbp3std_w1 = ifelse(sbp3std_w1<140, 0, sbp3std_w1),
+    sbp3std_w1 = ifelse(sbp3std_w1>=140, 1, sbp3std_w1),
     
 
     # dementia... what to do?
