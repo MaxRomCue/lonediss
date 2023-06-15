@@ -92,8 +92,7 @@ choleself =~ hcheat + hcang  + hccor
 choles =~ cholesbio + choleself
 
 bpbio =~ omdiaval + omsysval
-bpself =~ hcbp 
-bp =~ bpbio + bpself
+bp =~ bpbio + hcbp
 
 cardio =~ hscrp + hcharth 
 
@@ -121,7 +120,6 @@ risk ~ i_hhsize
 risk ~ i_finnow
 risk ~ b2*physical
 
-
 self ~ i_dvage
 self ~ i_sex
 self ~ c1*lone
@@ -131,10 +129,7 @@ self ~ b1*physical
 
 
 #Covariances
-#lone ~~ choles
-#lone ~~ bp
-#lone ~~ cardio
-#lone ~~ diab
+
 #self ~~ c_big5n_dv
 #risk ~~ c_big5n_dv
 
