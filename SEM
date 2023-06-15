@@ -234,12 +234,11 @@ self ~ hadstot_w1
 self ~ hiqual_w1
 
 
-bio1 =~ cholesbio + bld_hba1c_w1
+bio =~ cholesbio + bpbio + bld_crprot_w1 + bld_hba1c_w1 + stroke_mask_w2 + dementia_code
 self =~ hichol_w1 + hibp_w1 + cvdhist_w1 + diab_w1 
 
-bio2 =~ bpbio + bld_crprot_w1
 
-bio =~ bio1 + bio2
+
 '
 
 
