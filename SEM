@@ -124,24 +124,6 @@ summary(modelfitdemen, fit = T, standardized = T)
 modindices(modelfitdemen, sort = T)
 
 
-LBC1936$dbp1sit_w1 <- scale(LBC1936$dbp1sit_w1)
-LBC1936$dbp2sit_w1 <- scale(LBC1936$dbp2sit_w1)
-LBC1936$dbp3sit_w1 <- scale(LBC1936$dbp3sit_w1)
-
-LBC1936$sbp1sit_w1 <- scale(LBC1936$sbp1sit_w1)
-LBC1936$sbp2sit_w1 <- scale(LBC1936$sbp2sit_w1)
-LBC1936$sbp3sit_w1 <- scale(LBC1936$sbp3sit_w1)
-
-LBC1936$dbp1std_w1 <- scale(LBC1936$dbp1std_w1)
-LBC1936$dbp2std_w1 <- scale(LBC1936$dbp2std_w1)
-LBC1936$dbp3std_w1 <- scale(LBC1936$dbp3std_w1)
-
-LBC1936$sbp1std_w1 <- scale(LBC1936$sbp1std_w1)
-LBC1936$sbp2std_w1 <- scale(LBC1936$sbp2std_w1)
-LBC1936$sbp3std_w1 <- scale(LBC1936$sbp3std_w1)
-
-
-
 #SEM 
 
 semmodel_w1 <- '
@@ -252,70 +234,37 @@ choles =~ cholesbio + hichol_w1
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
 sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
 bpbio =~ dbp + sbp
-bp =~ sbp + hibp_w1
+bp =~ bpbio + hibp_w1
 
 cardio =~ bld_crprot_w1 + cvdhist_w1
 
 diab =~ bld_hba1c_w1 + diab_w1
 
-risk =~ choles + bp + cardio + diab
+risk =~ choles + bp + cardio + diab + stroke_mask_w2 + dementia_code
 
 risk ~ c*lonely_w1
 risk ~ sex
 risk ~ b*phyactiv_w1
+risk ~ hmsonum_w1
+risk ~ hadstot_w1
+risk ~ hiqual_w1
 
 
-hibp_w1 ~~ hichol_w1
-#hibp_w1 ~~ cvdhist_w1  
-#hibp_w1 ~~ diab_w1           
-hichol_w1 ~~ cvdhist_w1
-hichol_w1 ~~ diab_w1
-diab_w1 ~~ cvdhist_w1
 
-cholesbio ~~ bpbio
-bpbio ~~ bld_crprot_w1
+bio =~ cholesbio + bpbio + bld_crprot_w1 + bld_hba1c_w1 + stroke_mask_w2 + dementia_code 
+
+
+bio ~ lonely_w1
+bio ~ sex 
+
 
 '
 
 test_fit <- sem(test, LBC1936, 
                     missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
+modindices(test_fit, sort = T)
 
 
 sbp ~~ vSBP * sbp
 vSBP > 0
-
-
-test <- '
-cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
-
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
-bpbio =~ dbp + sbp
-
-
-risk =~ cholesbio + bpbio + bld_crprot_w1 + bld_hba1c_w1 + stroke_mask_w2 + dementia_code
-
-risk ~ c*lonely_w1
-risk ~ sex
-risk ~ b*phyactiv_w1
-
-
-
-#bpbio ~~ cholesbio
-#hibp_w1 ~~ hichol_w1
-
-#bld_crprot_w1 ~~ cholesbio
-#cvdhist_w1 ~~ hichol_w1
-#bld_crprot_w1 ~~ bpbio
-#cvdhist_w1 ~~ hibp_w1
-
-#bld_hba1c_w1 ~~ cholesbio
-#diab_w1 ~~ hichol_w1
-#bld_hba1c_w1 ~~ bpbio
-#diab_w1 ~~ hibp_w1
-#bld_hba1c_w1 ~~ bld_crprot_w1
-#diab_w1 ~~ cvdhist_w1
-'
-
-
