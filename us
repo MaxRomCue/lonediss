@@ -27,24 +27,22 @@ hist(as.numeric(blood$trig))
 
 
 
-kable(blood %>% # getting data 
-    group_by(hscrp>=3) %>% # grouping by age_stage
-    filter(!is.na(hscrp)) %>%
-    filter(hscrp>0)%>%
+kable(c_indresp %>% # getting data 
+    group_by(c_scptrt5n2) %>% # grouping by age_stage
+    filter(!is.na(c_scptrt5n2)) %>%
+    filter(c_scptrt5n2>0)%>%
       summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
 
 
 
-kable(USoc %>% # getting data 
-        group_by(hscrp) %>% # grouping by age_stage
-        filter(!is.na(hscrp)) %>%
+kable(c_indresp %>% # getting data 
+        group_by(c_scptrt5n2) %>% # grouping by age_stage
+        filter(!is.na(c_scptrt5n2)) %>%
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
-
-summary(x_indresp$hyper1)
 
 x_indresp %>%
   select(contains("hyper1"))%>%
@@ -199,7 +197,7 @@ a_ind <- a_indresp %>%
   )
 
 c_ind <- c_indresp %>%
-  select(c(pidp, c_big5n_dv, c_closenum, c_hcond17, c_hcond1, c_hcond2, c_hcond3, c_hcond4, c_hcond5, c_hcond6, c_hcond7, c_hcond8, c_hcond9, c_hcond10, c_hcond11, c_hcond12, c_hcond14, c_hcond16))%>%
+  select(c(pidp, c_big5n_dv, c_scptrt5n1, c_scptrt5n2, c_scptrt5n3, c_closenum, c_hcond17, c_hcond1, c_hcond2, c_hcond3, c_hcond4, c_hcond5, c_hcond6, c_hcond7, c_hcond8, c_hcond9, c_hcond10, c_hcond11, c_hcond12, c_hcond14, c_hcond16))%>%
   mutate(
     c_hcond17 = ifelse(c_hcond17<0, NA_real_, c_hcond17),
     c_hcond1 = ifelse(c_hcond1<0, NA, c_hcond1),
@@ -219,6 +217,12 @@ c_ind <- c_indresp %>%
     c_hcond16 = ifelse(c_hcond16<0, NA, c_hcond16),
     c_closenum = ifelse(c_closenum<0, NA, c_closenum),
     c_big5n_dv = ifelse(c_big5n_dv<0, NA, c_big5n_dv),
+    c_scptrt5n1 = ifelse(c_scptrt5n1<0, NA, c_scptrt5n1),
+    c_scptrt5n2 = ifelse(c_scptrt5n2<0, NA, c_scptrt5n2),
+    c_scptrt5n3 = ifelse(c_scptrt5n3<0, NA, c_scptrt5n3)
+    
+    
+    
     
   )
 
@@ -396,74 +400,53 @@ summary(modelselfbi)
 plot_model(modelself, type = "slope")
 
 
-summary(USoc$hccor)
-
-summary(USoc$c_big5n_dv)
-
-
-
-#SEM
-
-#Need to Scale? Age...physical activity
-
-USoc$i_wday <- scale(USoc$i_wday)
-USoc$i_mday <- scale(USoc$i_mday)
-USoc$i_vday <- scale(USoc$i_vday)
-USoc$i_dvage <- scale(USoc$i_dvage)
-USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
-USoc$i_sf12mcs_dv <- scale(USoc$i_sf12mcs_dv)
-USoc$i_sclfsato <- scale(USoc$i_sclfsato)
-USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
-
-
-
 
 semmodel <- '
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
+choles =~ cholesbio + choleself
 
-#choles
-choles =~ hdl + trig + hchypert
+bpbio =~ omdiaval + omsysval
+bp =~ bpbio + hcbp
 
-#cvd
-cvd =~ hscrp
+cardio =~ hscrp + hcharth 
 
-#blood pressure
-bp =~ omdiaval + omsysval + hcbp
-
-#diabetes
 diab =~ hba1c + hcdiab
 
 #chronic health index (higher values is having worse outcomes)
-risk =~ choles + bp + diab + cvd
+risk =~ choles + bp + cardio + diab
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 #physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
 
 #self report (higher values is having better outcomes)
+#selfphy =~ i_sf12pcs_dv + i_health 
+#selfmen =~ i_sclfsato + i_sf12mcs_dv 
+#self =~ i_sf12pcs_dv + i_sclfsato + i_sf12mcs_dv
 
-selfphy =~ i_sf12pcs_dv + i_health
-selfmen =~ i_sclfsato + i_sf12mcs_dv
 
-self =~ selfphy + selfmen
-
-#loneliness (higher values is being more lonely)
-lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
-
-#Direct
+risk ~ i_dvage
+risk ~ i_sex
 risk ~ c2*lone
 risk ~ i_hhsize
 risk ~ i_finnow
-risk ~ i_dvage
-risk ~ i_sex
 risk ~ b2*physical
 
-self ~ c1*lone
-self ~ i_hhsize
-self ~ i_finnow
-self ~ i_dvage
-self ~ i_sex
-self ~ b1*physical
+#self ~ i_dvage
+#self ~ i_sex
+#self ~ c1*lone
+#self ~ i_hhsize
+#self ~ i_finnow
+#self ~ b1*physical
 
-risk ~~ self
+bio =~ cholesbio + bpbio + hscrp + hba1c 
+
+bio ~ lone
+bio ~ i_sex
+bio ~ i_dvage
 
 physical~a2*lone
 
@@ -471,35 +454,24 @@ physical~a2*lone
 ind2:=a2*b2
 
 #Total
-TotalSelf:=c1+a2*b1
+#TotalSelf:=c1+a2*b1
 TotalBio:=c2+a2*b2
 
-Total:=TotalSelf + TotalBio
+#Total:=TotalSelf + TotalBio
 
+#MODINDICES
+lone  ~     i_finnow
 
-# ModIndices
-#i_sf12pcs_dv ~~ i_health
-#lone  ~   i_finnow
-#i_sf12pcs_dv ~~ i_sf12mcs_dv
-#i_sclonely ~~  i_sclackcom
-
-#self ~~ c_big5n_dv
-hcbp ~~ hccor
-hcbp ~~ hcdiab
-hcdiab ~~ hccor
 '
 
 sem_model <- sem(semmodel, USoc, 
                     #se = 'bootstrap',
                     missing = 'fiml.x')
 
-#fiml.x???
 
 summary(sem_model, fit.measures = T, standardized =T, ci = T)
 
 semPaths(sem_model, intercept = FALSE, whatLabel = "std",
          residuals = TRUE, exoCov = FALSE)
 modindices(sem_model, sort = T)
-
-
 varTable(sem_model) 
