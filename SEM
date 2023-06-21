@@ -1,6 +1,3 @@
-
-
-
 LBCtest %>%
   describe %>%
   as.data.frame() %>%
@@ -126,105 +123,6 @@ modindices(modelfitdemen, sort = T)
 
 #SEM 
 
-semmodel_w1 <- '
-
-cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
-choles =~ cholesbio + hichol_w1
-
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
-bpbio =~ dbp + sbp
-bp =~ bpbio            
-
-cardio =~ bld_crprot_w1 + cvdhist_w1
-
-diab =~ bld_hba1c_w1 + diab_w1
-
-stroke =~ stroke_mask_w2
-
-dementia =~ dementia_code
-
-#chronic health index 
-risk =~ choles + bp + cardio + diab + stroke + dementia
-
-risk ~ c*lonely_w1
-risk ~ livealn_w1
-risk ~ hiqual_w1
-risk ~ sex
-risk ~ hmsonum_w1
-risk ~ hadstot_w1
-
-risk ~ b*phyactiv_w1
-
-#phyactiv_w1 ~ a*lonely_w1
-
-
-#Indirect
-#ind:=a*b
-
-#Total
-#Total:=c+a*b
-
-
-
-#Modindices
-hichol_w1 ~~     cvdhist_w1
-#hichol_w1 ~~        hibp_w1
-#hichol_w1 ~~ diab_w1
-#cvdhist_w1 ~~        hibp_w1
-#hibp_w1 ~~ diab_w1
-
-
-#lonely_w1 ~~ bp 
-#lonely_w1 ~~ choles
-#lonely_w1 ~~ cardio
-#lonely_w1 ~~ stroke
-#lonely_w1 ~~ diab
-#lonely_w1 ~~ dementia
-
-'
-
-sem_model_w1 <- sem(semmodel_w1, LBC1936, 
-                    missing = 'FIML')
-summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
-modindices(sem_model_w1, sort = T)
-resid(sem_model_w1, type="cor")
-
-#crp and bp make no sense, need to check distribution
-
-test <- '
-cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
-
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
-bpbio =~ dbp + sbp
-
-
-
-bio ~ c*lonely_w1
-bio ~ sex
-bio ~ b*phyactiv_w1
-bio ~ hmsonum_w1
-bio ~ hadstot_w1
-bio ~ hiqual_w1
-
-self ~ c*lonely_w1
-self ~ sex
-self ~ b*phyactiv_w1
-self ~ hmsonum_w1
-self ~ hadstot_w1
-self ~ hiqual_w1
-
-
-bio =~ cholesbio + bpbio + bld_crprot_w1 + bld_hba1c_w1 + stroke_mask_w2 + dementia_code
-self =~ hichol_w1 + hibp_w1 + cvdhist_w1 + diab_w1 
-
-
-
-'
-
-
-
 
 test <- '
 
@@ -249,13 +147,24 @@ risk ~ hmsonum_w1
 risk ~ hadstot_w1
 risk ~ hiqual_w1
 
+bio ~ lonely_w1
+bio ~ sex 
 
+
+
+phyactiv_w1 ~ a*lonely_w1
 
 bio =~ cholesbio + bpbio + bld_crprot_w1 + bld_hba1c_w1 + stroke_mask_w2 + dementia_code 
 
 
-bio ~ lonely_w1
-bio ~ sex 
+
+#Indirect
+ind2:=a*b
+
+#Total
+TotalBio:=c+a*b
+
+
 
 
 '
@@ -264,6 +173,7 @@ test_fit <- sem(test, LBC1936,
                     missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
 modindices(test_fit, sort = T)
+resid(sem_model_w1, type="cor")
 
 
 sbp ~~ vSBP * sbp
