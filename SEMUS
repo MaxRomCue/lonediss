@@ -129,19 +129,19 @@ risk ~~ neuro
 self ~~ neuro
 
 
-risk ~ b2*i_dvage
+risk ~ i_dvage
 risk ~ i_sex
 risk ~ c2*lone
 risk ~ i_hhsize
 risk ~ i_finnow
-risk ~ physical
+risk ~ b2*physical
 
-self ~ b1*i_dvage
+self ~ i_dvage
 self ~ i_sex
 self ~ c1*lone
 self ~ i_hhsize
 self ~ i_finnow
-self ~ physical
+self ~ b1*physical
 
 bio =~ cholesbio + bpbio + hscrp + hba1c 
 
@@ -165,6 +165,6 @@ Total:=TotalSelf - TotalBio
 '
 
 test_fit <- sem(test, USoc, 
-                missing = 'fiml.x')
+                missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
 modindices(test_fit, sort = T)
