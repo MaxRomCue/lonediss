@@ -20,7 +20,7 @@ ggplot(USoc, aes(x=hscrp)) + geom_bar(position="dodge")
 
 
 
-hist(as.numeric(USoc$hscrp))
+hist(as.numeric(USoc$i_sclonely))
 
 hist(as.numeric(blood$trig))
 
@@ -128,9 +128,6 @@ US <- i_indresp %>%
   
   
 
-#NEED TO DETERMINE WHICH VARIABLES TO USE (SELF-REPORT, WHICH)
-
-
 
 #Biomarker Model wave 2-3 outcomes regressed on wave 9 loneliness
 
@@ -147,11 +144,11 @@ summary(biomodelbi)
 modelqol <- lm(i_sf12pcs_dv ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize + i_dvage + i_sex  + i_finnow, US)
 summary(modelqol)
 
-modelhealth <- lm(i_health ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, US, 
+modelhealth <- lm(i_health ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize + i_dvage + i_sex  + i_finnow, US, 
                    family = binomial(link = "logit"))
 summary(modelhealth)
 
-modellife <- lm(i_sclfsato ~ i_sclonely * (i_hhsize + i_sf12pcs_dv) + i_sf12mcs_dv + i_dvage + i_sex  + i_finnow, US)
+modellife <- lm(i_sclfsato ~ i_sclonely * (i_sf12mcs_dv + i_sf12pcs_dv) + i_hhsize + i_dvage + i_sex  + i_finnow, US)
 summary(modellife)
 
 #Model Graphs
@@ -220,9 +217,6 @@ c_ind <- c_indresp %>%
     c_scptrt5n1 = ifelse(c_scptrt5n1<0, NA, c_scptrt5n1),
     c_scptrt5n2 = ifelse(c_scptrt5n2<0, NA, c_scptrt5n2),
     c_scptrt5n3 = ifelse(c_scptrt5n3<0, NA, c_scptrt5n3)
-    
-    
-    
     
   )
 
@@ -398,80 +392,3 @@ modelselfbi <- glm(selfoutcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wd
 summary(modelselfbi)
   
 plot_model(modelself, type = "slope")
-
-
-
-semmodel <- '
-cholesbio =~ hdl + trig 
-choleself =~ hcheat + hcang  + hccor 
-choles =~ cholesbio + choleself
-
-bpbio =~ omdiaval + omsysval
-bp =~ bpbio + hcbp
-
-cardio =~ hscrp + hcharth 
-
-diab =~ hba1c + hcdiab
-
-#chronic health index (higher values is having worse outcomes)
-risk =~ choles + bp + cardio + diab
-
-#loneliness (higher values is being more lonely)
-lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
-
-#physical activity (higher values is exercising more)
-physical =~ i_vday + i_mday + i_wday
-
-#self report (higher values is having better outcomes)
-#selfphy =~ i_sf12pcs_dv + i_health 
-#selfmen =~ i_sclfsato + i_sf12mcs_dv 
-#self =~ i_sf12pcs_dv + i_sclfsato + i_sf12mcs_dv
-
-
-risk ~ i_dvage
-risk ~ i_sex
-risk ~ c2*lone
-risk ~ i_hhsize
-risk ~ i_finnow
-risk ~ b2*physical
-
-#self ~ i_dvage
-#self ~ i_sex
-#self ~ c1*lone
-#self ~ i_hhsize
-#self ~ i_finnow
-#self ~ b1*physical
-
-bio =~ cholesbio + bpbio + hscrp + hba1c 
-
-bio ~ lone
-bio ~ i_sex
-bio ~ i_dvage
-
-physical~a2*lone
-
-#Indirect
-ind2:=a2*b2
-
-#Total
-#TotalSelf:=c1+a2*b1
-TotalBio:=c2+a2*b2
-
-#Total:=TotalSelf + TotalBio
-
-#MODINDICES
-lone  ~     i_finnow
-
-'
-
-sem_model <- sem(semmodel, USoc, 
-                    #se = 'bootstrap',
-                    missing = 'fiml.x')
-
-
-summary(sem_model, fit.measures = T, standardized =T, ci = T)
-
-semPaths(sem_model, intercept = FALSE, whatLabel = "std",
-         residuals = TRUE, exoCov = FALSE)
-modindices(sem_model, sort = T)
-varTable(sem_model) 
