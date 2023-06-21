@@ -181,7 +181,7 @@ table(LBC1936$hibp_w1, LBC1936$meansbpsit_w1, useNA = "ifany")%>%
 
 
 #biomarker model wave 1 outcomes regressed on wave 1 loneliness
-biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (phyactiv_w1 + livealn_w1) + hadstot_w1 + hiqual_w1 + sex, LBC1936)
+biomodel_w1 <- lm(totalrisk_w1 ~ lonely_w1  * (phyactiv_w1 + livealn_w1) + livealn_w1 + hadstot_w1 + hiqual_w1 + sex, LBC1936)
 summary(biomodel_w1)
 
 ggplot(LBC1936, aes(x=lonely_w1,y=totalrisk_w1))+
