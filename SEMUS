@@ -168,3 +168,109 @@ test_fit <- sem(test, USoc,
                 missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
 modindices(test_fit, sort = T)
+
+
+
+
+sem_model <- '
+
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
+choles =~ cholesbio + choleself
+
+bpbio =~ omdiaval + omsysval
+bp =~ bpbio + hcbp
+
+cardio =~ hscrp + hcharth 
+
+diab =~ hba1c + hcdiab
+
+#chronic health index (higher values is having worse outcomes)
+#risk =~ choles + bp + cardio + diab
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
+#physical activity (higher values is exercising more)
+physical =~ i_vday + i_mday + i_wday
+
+#self report (higher values is having better outcomes)
+#self =~ i_sf12mcs_dv + i_sclfsato 
+
+
+#neuroticism
+#neuro =~ c_scptrt5n1 + c_scptrt5n2 + c_scptrt5n3
+
+#choles ~~ neuro
+#bp ~~ neuro
+#cardio ~~ neuro
+#diab ~~ neuro
+
+choles ~ i_dvage
+choles ~ i_sex
+choles ~ c1*lone
+choles ~ i_hhsize
+choles ~ i_finnow
+choles ~ b1*physical
+
+bp ~ i_dvage
+bp ~ i_sex
+bp ~ c2*lone
+bp ~ i_hhsize
+bp ~ i_finnow
+bp ~ b2*physical
+
+cardio ~ i_dvage
+cardio ~ i_sex
+cardio ~ c3*lone
+cardio ~ i_hhsize
+cardio ~ i_finnow
+cardio ~ b3*physical
+
+
+diab ~ i_dvage
+diab ~ i_sex
+diab ~ c4*lone
+diab ~ i_hhsize
+diab ~ i_finnow
+diab ~ b4*physical
+
+
+#self ~ i_dvage
+#self ~ i_sex
+#self ~ c4*lone
+#self ~ i_hhsize
+#self ~ i_finnow
+#self ~ b4*physical
+
+
+
+#physical~a*lone
+
+#Indirect
+#Indcholes:=a*b1
+#Indbp:=a*b2
+#Indcardio:=a*b3
+#Inddiab:=a*b4
+
+
+#Total
+#TotalCholes:=c1+a*b1
+#TotalBP:=c2+a*b2
+#TotalCardio:=c3+a*b3
+#TotalDiab:=c4+a*b4
+
+
+#LonelinessHealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
+
+
+'
+
+
+sem_modelfit <- sem(sem_model, USoc, 
+                missing = 'FIML')
+summary(sem_modelfit, fit.measures = T, standardized =T, ci = T)
+modindices(sem_modelfit, sort = T)
+
+lavInspect(sem_modelfit, "cov.lv") 
+sem_modelfit@SampleStats@cov
