@@ -175,7 +175,7 @@ ggplot(LBC1936, aes(dbp3sit_w1, hibp_w1))+#SOME ARE REVERSE CODED?
   geom_smooth(method="glm")
 
 
-table(LBC1936$hibp_w1, LBC1936$meansbpsit_w1, useNA = "ifany")%>%
+table(LBC1936$meandbpsit_w1, LBC1936$meansbpsit_w1, LBC1936$hibp_w1, useNA = "ifany")%>%
   kable() %>%
   kable_styling()
 
