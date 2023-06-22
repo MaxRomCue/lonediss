@@ -245,24 +245,43 @@ diab ~ b4*physical
 
 
 
-#physical~a*lone
+
+physical~a*lone
 
 #Indirect
-#Indcholes:=a*b1
-#Indbp:=a*b2
-#Indcardio:=a*b3
-#Inddiab:=a*b4
+Indcholes:=a*b1
+Indbp:=a*b2
+Indcardio:=a*b3
+Inddiab:=a*b4
 
 
 #Total
-#TotalCholes:=c1+a*b1
-#TotalBP:=c2+a*b2
-#TotalCardio:=c3+a*b3
-#TotalDiab:=c4+a*b4
+TotalCholes:=c1+a*b1
+TotalBP:=c2+a*b2
+TotalCardio:=c3+a*b3
+TotalDiab:=c4+a*b4
 
 
-#LonelinessHealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
+LonelinessHealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
 
+choleself ~~ hcbp
+choleself ~~ hcharth
+choleself ~~ hcdiab
+
+hcbp  ~~ hcharth
+hcbp  ~~ hcdiab
+
+hcharth  ~~ hcdiab
+
+
+cholesbio ~~ bpbio
+cholesbio ~~ hscrp
+cholesbio ~~ hba1c
+
+bpbio ~~ hscrp
+bpbio ~~ hba1c
+
+hscrp ~~ hba1c
 
 '
 
