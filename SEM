@@ -173,7 +173,9 @@ test_fit <- sem(test, LBC1936,
                     missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
 modindices(test_fit, sort = T)
-resid(sem_model_w1, type="cor")
+resid(test_fit, type="cor")
+
+covariancsemPaths(test_fit, what='paths')
 
 
 sbp ~~ vSBP * sbp
@@ -188,7 +190,7 @@ choles =~ cholesbio + hichol_w1
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
 sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
 bpbio =~ dbp + sbp
-bp =~ sbp + hibp_w1
+bp =~ bpbio + hibp_w1
 
 cardio =~ bld_crprot_w1 + cvdhist_w1
 
@@ -222,15 +224,41 @@ diab ~ hmsonum_w1
 diab ~ hadstot_w1
 diab ~ hiqual_w1
 
+stroke_mask_w2 ~ lonely_w1
+stroke_mask_w2 ~ sex
+stroke_mask_w2 ~ phyactiv_w1
+stroke_mask_w2 ~ hmsonum_w1
+stroke_mask_w2 ~ hadstot_w1
+stroke_mask_w2 ~ hiqual_w1
 
-choles ~~ hibp_w1
-choles ~~ cvdhist_w1
-choles ~~ diab_w1
+dementia_code ~ lonely_w1
+dementia_code ~ sex
+dementia_code ~ phyactiv_w1
+dementia_code ~ hmsonum_w1
+dementia_code ~ hadstot_w1
+dementia_code ~ hiqual_w1
 
-bp ~~ cvdhist_w1
-bp ~~ diab_w1
 
-cardio ~~ diab_w1
+cholesbio ~~ bpbio
+cholesbio ~~ bld_crprot_w1
+cholesbio ~~ bld_hba1c_w1
+bpbio ~~ bld_crprot_w1
+bpbio ~~ bld_hba1c_w1
+bld_crprot_w1 ~~ bld_hba1c_w1
+
+hichol_w1 ~~     cvdhist_w1
+hichol_w1 ~~        hibp_w1
+hichol_w1 ~~ diab_w1
+cvdhist_w1 ~~        hibp_w1
+hibp_w1 ~~ diab_w1
+cvdhist_w1 ~~ diab_w1
+
+choles ~~ bp
+choles ~~ cardio
+choles ~~ diab
+bp ~~ cardio
+bp ~~ diab
+cardio ~~ diab
 
 
 phyactiv_w1 ~ a*lonely_w1
@@ -251,7 +279,8 @@ sem_model_w1 <- sem(semmodel_w1, LBC1936,
                     missing = 'FIML')
 summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
 
-semPaths(sem_model_w1, what='paths')
+
+covariancsemPaths(sem_model_w1, what='paths')
 modindices(sem_model_w1, sort = T)
 
 
@@ -319,6 +348,67 @@ dementia_code ~ hiqual_w1
 
 
 phyactiv_w1 ~ a*lonely_w1
+
+cholesbio ~ lonely_w1
+cholesbio ~ sex
+cholesbio ~ phyactiv_w1
+cholesbio ~ hmsonum_w1
+cholesbio ~ hadstot_w1
+cholesbio ~ hiqual_w1
+
+bpbio ~ lonely_w1
+bpbio ~ sex
+bpbio ~ phyactiv_w1
+bpbio ~ hmsonum_w1
+bpbio ~ hadstot_w1
+bpbio ~ hiqual_w1
+
+bld_crprot_w1 ~ lonely_w1
+bld_crprot_w1 ~ sex
+bld_crprot_w1 ~ phyactiv_w1
+bld_crprot_w1 ~ hmsonum_w1
+bld_crprot_w1 ~ hadstot_w1
+bld_crprot_w1 ~ hiqual_w1
+
+bld_hba1c_w1 ~ lonely_w1
+bld_hba1c_w1 ~ sex
+bld_hba1c_w1 ~ phyactiv_w1
+bld_hba1c_w1 ~ hmsonum_w1
+bld_hba1c_w1 ~ hadstot_w1
+bld_hba1c_w1 ~ hiqual_w1
+
+
+
+
+hichol_w1 ~ lonely_w1
+hichol_w1 ~ sex
+hichol_w1 ~ phyactiv_w1
+hichol_w1 ~ hmsonum_w1
+hichol_w1 ~ hadstot_w1
+hichol_w1 ~ hiqual_w1
+
+hibp_w1 ~ lonely_w1
+hibp_w1 ~ sex
+hibp_w1 ~ phyactiv_w1
+hibp_w1 ~ hmsonum_w1
+hibp_w1 ~ hadstot_w1
+hibp_w1 ~ hiqual_w1
+
+cvdhist_w1 ~ lonely_w1
+cvdhist_w1 ~ sex
+cvdhist_w1 ~ phyactiv_w1
+cvdhist_w1 ~ hmsonum_w1
+cvdhist_w1 ~ hadstot_w1
+cvdhist_w1 ~ hiqual_w1
+
+diab_w1 ~ lonely_w1
+diab_w1 ~ sex
+diab_w1 ~ phyactiv_w1
+diab_w1 ~ hmsonum_w1
+diab_w1 ~ hadstot_w1
+diab_w1 ~ hiqual_w1
+
+
 
 
 
