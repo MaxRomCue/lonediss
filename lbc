@@ -170,7 +170,7 @@ LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code
 
 
 
-ggplot(LBC1936, aes(dbp3sit_w1, hibp_w1))+#SOME ARE REVERSE CODED?
+ggplot(LBC, aes(sbp2std_w1, cvdhist_w1))+#SOME ARE REVERSE CODED?
   geom_point()+
   geom_smooth(method="glm")
 
@@ -251,7 +251,7 @@ modelmort_w2 <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + ha
 summary(modelmort_w2)
 
 
-ggplot(LBC1936, aes(x=eurlonely_w2,y=ageyrs_death))+
+ggplot(LBC, aes(x=dbp1sit_w1,y=hibp_w1))+
   geom_point() +
   geom_smooth(method=lm)
 
