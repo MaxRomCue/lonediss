@@ -39,8 +39,8 @@ modindices(modelfitcholes, sort = T)
 summary(LBC$bld_crprot_w1)
 
 modelbp <-'
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1
 bpbio =~ dbp + sbp
 bp =~ bpbio + hibp_w1
 
@@ -187,12 +187,12 @@ semmodel_w1 <- '
 cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
 choles =~ cholesbio + hichol_w1
 
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
 bpbio =~ dbp + sbp
 bp =~ bpbio + hibp_w1
 
-cardio =~ bld_crprot_w1 + cvdhist_w1
+#cardio =~ bld_crprot_w1 #+ cvdhist_w1
 
 diab =~ bld_hba1c_w1 + diab_w1
 
@@ -210,12 +210,12 @@ bp ~ hmsonum_w1
 bp ~ hadstot_w1
 bp ~ hiqual_w1
 
-cardio ~ lonely_w1
-cardio ~ sex
-cardio ~ phyactiv_w1
-cardio ~ hmsonum_w1
-cardio ~ hadstot_w1
-cardio ~ hiqual_w1
+#cardio ~ lonely_w1
+#cardio ~ sex
+#cardio ~ phyactiv_w1
+#cardio ~ hmsonum_w1
+#cardio ~ hadstot_w1
+#cardio ~ hiqual_w1
 
 diab ~ lonely_w1
 diab ~ sex
@@ -246,19 +246,12 @@ bpbio ~~ bld_crprot_w1
 bpbio ~~ bld_hba1c_w1
 bld_crprot_w1 ~~ bld_hba1c_w1
 
-hichol_w1 ~~     cvdhist_w1
-hichol_w1 ~~        hibp_w1
-hichol_w1 ~~ diab_w1
-cvdhist_w1 ~~        hibp_w1
-hibp_w1 ~~ diab_w1
-cvdhist_w1 ~~ diab_w1
-
-choles ~~ bp
-choles ~~ cardio
-choles ~~ diab
-bp ~~ cardio
-bp ~~ diab
-cardio ~~ diab
+#hichol_w1 ~~     cvdhist_w1
+#hichol_w1 ~~        hibp_w1
+#hichol_w1 ~~ diab_w1
+#cvdhist_w1 ~~        hibp_w1
+#hibp_w1 ~~ diab_w1
+#cvdhist_w1 ~~ diab_w1
 
 
 phyactiv_w1 ~ a*lonely_w1
