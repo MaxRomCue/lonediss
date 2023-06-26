@@ -18,8 +18,8 @@ LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MR
 
 summary(LBC$age_at_dementia_diagnosis)
 
-ggplot(LBC1936, aes(x=cvdhist_w1)) + geom_bar(position="dodge")
-hist(as.numeric(LBC$bld_crprot_w1))
+ggplot(LBC1936, aes(x=ageyrs_death)) + geom_bar(position="dodge")
+hist(as.numeric(LBC$ageyrs_death))
 
 LBCtest <- LBC1936 %>%
   select(lonely_w1, bld_crprot_w1, bld_choles_w1, bld_hdlchol_w1, bld_hdlrat_w1, bld_triglyc_w1, meandbpsit_w1, meansbpsit_w1, bld_hba1c_w1, dementia_code, stroke_mask_w2, totalrisk_w1)
@@ -251,7 +251,7 @@ modelmort_w2 <- lm(ageyrs_death ~ eurlonely_w2 * (livealn_w2 + phyactiv_w1) + ha
 summary(modelmort_w2)
 
 
-ggplot(LBC, aes(x=dbp1sit_w1,y=hibp_w1))+
+ggplot(LBC1936, aes(x=phyactiv_w1,y=ageyrs_death))+
   geom_point() +
   geom_smooth(method=lm)
 
@@ -259,9 +259,6 @@ ggplot(LBC, aes(x=dbp1sit_w1,y=hibp_w1))+
 plot_model(modelmort_w1, type = "slope")
 tab_model(modelselfbi)
 
-
-
-#hadstot_w2 + livealn_w2 + hiqual_w1 + sex + agedays_w2 + phyactiv_w1 + hmsonum_w1 + eaaq3_w2
 
 
 #SEM 
