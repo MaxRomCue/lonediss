@@ -53,13 +53,14 @@ bp ~ phyactiv_w1
 bp ~ hmsonum_w1
 bp ~ hadstot_w1
 '
-modelfitbp <- cfa(modelbp, LBC1936, std.lv = T)
+modelfitbp <- cfa(modelbp, LBC, std.lv = T)
 summary(modelfitbp, fit = T, standardized = T)
 modindices(modelfitbp, sort = T)
 semPaths(modelfitbp, what="paths")
 
 modelcardio <-'
-cardio =~ bld_crprot_w1 + cvdhist_w1  
+cardioself=~ cvdhist_w1 + diab_w1
+cardio =~ bld_crprot_w1 + cardioself  
 
 
 cardio ~ sex
@@ -189,113 +190,15 @@ choles =~ cholesbio + hichol_w1
 
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
 sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
-bpbio =~ dbp + sbp
-bp =~ bpbio + hibp_w1
+bp =~ dbp + sbp + hibp_w1
 
-#cardio =~ bld_crprot_w1 #+ cvdhist_w1
-
-diab =~ bld_hba1c_w1 + diab_w1
-
-choles ~ lonely_w1
-choles ~ sex
-choles ~ phyactiv_w1
-choles ~ hmsonum_w1
-choles ~ hadstot_w1
-choles ~ hiqual_w1
-
-bp ~ lonely_w1
-bp ~ sex
-bp ~ phyactiv_w1
-bp ~ hmsonum_w1
-bp ~ hadstot_w1
-bp ~ hiqual_w1
-
-#cardio ~ lonely_w1
-#cardio ~ sex
-#cardio ~ phyactiv_w1
-#cardio ~ hmsonum_w1
-#cardio ~ hadstot_w1
-#cardio ~ hiqual_w1
-
-diab ~ lonely_w1
-diab ~ sex
-diab ~ phyactiv_w1
-diab ~ hmsonum_w1
-diab ~ hadstot_w1
-diab ~ hiqual_w1
-
-stroke_mask_w2 ~ lonely_w1
-stroke_mask_w2 ~ sex
-stroke_mask_w2 ~ phyactiv_w1
-stroke_mask_w2 ~ hmsonum_w1
-stroke_mask_w2 ~ hadstot_w1
-stroke_mask_w2 ~ hiqual_w1
-
-dementia_code ~ lonely_w1
-dementia_code ~ sex
-dementia_code ~ phyactiv_w1
-dementia_code ~ hmsonum_w1
-dementia_code ~ hadstot_w1
-dementia_code ~ hiqual_w1
-
-
-cholesbio ~~ bpbio
-cholesbio ~~ bld_crprot_w1
-cholesbio ~~ bld_hba1c_w1
-bpbio ~~ bld_crprot_w1
-bpbio ~~ bld_hba1c_w1
-bld_crprot_w1 ~~ bld_hba1c_w1
-
-#hichol_w1 ~~     cvdhist_w1
-#hichol_w1 ~~        hibp_w1
-#hichol_w1 ~~ diab_w1
-#cvdhist_w1 ~~        hibp_w1
-#hibp_w1 ~~ diab_w1
-#cvdhist_w1 ~~ diab_w1
-
-
-phyactiv_w1 ~ a*lonely_w1
-
-
-#Indirect
-#ind2:=a*b
-
-#Total
-#TotalBio:=c+a*b
-
-
-
-
-'
-
-sem_model_w1 <- sem(semmodel_w1, LBC1936, 
-                    missing = 'FIML')
-summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
-
-
-covariancsemPaths(sem_model_w1, what='paths')
-modindices(sem_model_w1, sort = T)
-
-
-
-
-
-
-
-
-semmodel_w1 <- '
-
-cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
-choles =~ cholesbio + hichol_w1
-
-dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
-sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
-bpbio =~ dbp + sbp
-bp =~ bpbio + hibp_w1
-
-cardio =~ bld_crprot_w1 + cvdhist_w1
+cardio =~ cvdhist_w1
 
 diab =~ bld_hba1c_w1 + diab_w1
+
+#stroke =~ stroke_mask_w2
+
+#demen =~ dementia_code
 
 choles ~ lonely_w1
 choles ~ sex
@@ -325,125 +228,45 @@ diab ~ hmsonum_w1
 diab ~ hadstot_w1
 diab ~ hiqual_w1
 
-stroke_mask_w2 ~ lonely_w1
-stroke_mask_w2 ~ sex
-stroke_mask_w2 ~ phyactiv_w1
-stroke_mask_w2 ~ hmsonum_w1
-stroke_mask_w2 ~ hadstot_w1
-stroke_mask_w2 ~ hiqual_w1
+#stroke ~ lonely_w1
+#stroke ~ sex
+#stroke ~ phyactiv_w1
+#stroke ~ hmsonum_w1
+#stroke ~ hadstot_w1
+#stroke ~ hiqual_w1
 
-dementia_code ~ lonely_w1
-dementia_code ~ sex
-dementia_code ~ phyactiv_w1
-dementia_code ~ hmsonum_w1
-dementia_code ~ hadstot_w1
-dementia_code ~ hiqual_w1
-
-
-phyactiv_w1 ~ a*lonely_w1
-
-cholesbio ~ lonely_w1
-cholesbio ~ sex
-cholesbio ~ phyactiv_w1
-cholesbio ~ hmsonum_w1
-cholesbio ~ hadstot_w1
-cholesbio ~ hiqual_w1
-
-bpbio ~ lonely_w1
-bpbio ~ sex
-bpbio ~ phyactiv_w1
-bpbio ~ hmsonum_w1
-bpbio ~ hadstot_w1
-bpbio ~ hiqual_w1
-
-bld_crprot_w1 ~ lonely_w1
-bld_crprot_w1 ~ sex
-bld_crprot_w1 ~ phyactiv_w1
-bld_crprot_w1 ~ hmsonum_w1
-bld_crprot_w1 ~ hadstot_w1
-bld_crprot_w1 ~ hiqual_w1
-
-bld_hba1c_w1 ~ lonely_w1
-bld_hba1c_w1 ~ sex
-bld_hba1c_w1 ~ phyactiv_w1
-bld_hba1c_w1 ~ hmsonum_w1
-bld_hba1c_w1 ~ hadstot_w1
-bld_hba1c_w1 ~ hiqual_w1
+#demen ~ lonely_w1
+#demen ~ sex
+#demen ~ phyactiv_w1
+#demen ~ hmsonum_w1
+#demen ~ hadstot_w1
+#demen ~ hiqual_w1
 
 
+#biomarkers covariances
+bld_triglyc_w1 ~~ bld_hba1c_w1
+bld_triglyc_w1 ~~ dbp
+bld_hdlchol_w1 ~~ bld_hba1c_w1
+bld_hdlchol_w1 ~~ sbp
+bld_hba1c_w1 ~~ dbp
+bld_hba1c_w1 ~~ sbp
 
-
-hichol_w1 ~ lonely_w1
-hichol_w1 ~ sex
-hichol_w1 ~ phyactiv_w1
-hichol_w1 ~ hmsonum_w1
-hichol_w1 ~ hadstot_w1
-hichol_w1 ~ hiqual_w1
-
-hibp_w1 ~ lonely_w1
-hibp_w1 ~ sex
-hibp_w1 ~ phyactiv_w1
-hibp_w1 ~ hmsonum_w1
-hibp_w1 ~ hadstot_w1
-hibp_w1 ~ hiqual_w1
-
-cvdhist_w1 ~ lonely_w1
-cvdhist_w1 ~ sex
-cvdhist_w1 ~ phyactiv_w1
-cvdhist_w1 ~ hmsonum_w1
-cvdhist_w1 ~ hadstot_w1
-cvdhist_w1 ~ hiqual_w1
-
-diab_w1 ~ lonely_w1
-diab_w1 ~ sex
-diab_w1 ~ phyactiv_w1
-diab_w1 ~ hmsonum_w1
-diab_w1 ~ hadstot_w1
-diab_w1 ~ hiqual_w1
+bld_triglyc_w1  ~~ sbp
+bld_hdlchol_w1 ~~ dbp
 
 
 
 
 
-cholesbio ~~ bpbio
-cholesbio ~~ bld_crprot_w1
-cholesbio ~~ bld_hba1c_w1
-cholesbio ~~ stroke_mask_w2
-cholesbio ~~ dementia_code
-
-bpbio ~~ bld_crprot_w1
-bpbio ~~ bld_hba1c_w1
-bpbio ~~ stroke_mask_w2
-bpbio ~~ dementia_code
-
-bld_crprot_w1 ~~ bld_hba1c_w1
-bld_crprot_w1 ~~ stroke_mask_w2
-bld_crprot_w1 ~~ dementia_code
-
-bld_hba1c_w1 ~~ stroke_mask_w2
-bld_hba1c_w1 ~~ dementia_code
-
-stroke_mask_w2 ~~ dementia_code
-
-hichol_w1 ~~ bpbio
-hichol_w1 ~~ bld_crprot_w1
-hichol_w1 ~~ bld_hba1c_w1
-hichol_w1 ~~ stroke_mask_w2
-hichol_w1 ~~ dementia_code
-
-hibp_w1 ~~ bld_crprot_w1
-hibp_w1 ~~ bld_hba1c_w1
-hibp_w1 ~~ stroke_mask_w2
-hibp_w1 ~~ dementia_code
-
-cvdhist_w1 ~~ bld_hba1c_w1
-cvdhist_w1 ~~ stroke_mask_w2
-cvdhist_w1 ~~ dementia_code
-
-diab_w1  ~~ stroke_mask_w2
-diab_w1  ~~ dementia_code
+#selfreport covariances
+hichol_w1 ~~ diab_w1
+hichol_w1 ~~ hibp_w1
+diab_w1 ~~ hibp_w1
 
 
+
+
+#phyactiv_w1 ~ lonely_w1
 
 
 #Indirect
@@ -456,3 +279,23 @@ diab_w1  ~~ dementia_code
 
 
 '
+
+sem_model_w1 <- sem(semmodel_w1, LBC1936, 
+                    missing = 'FIML')
+summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+
+
+
+covariancsemPaths(sem_model_w1, what='paths')
+modindices(sem_model_w1, sort = T)
+
+lavInspect(sem_model_w1, "cov.lv")
+lavInspect(sem_model_w1, "theta") 
+
+standardizedSolution(sem_model_w1, type = "std.all", se = TRUE, zstat = TRUE, 
+                     pvalue = TRUE, ci = TRUE, level = 0.95, cov.std = TRUE, 
+                     remove.eq = TRUE, remove.ineq = TRUE, remove.def = FALSE, 
+                     partable = NULL, GLIST = NULL, est = NULL,
+                     output = "data.frame")
+
+?det
