@@ -16,9 +16,8 @@ library(semPlot)
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_14JUN2023.sav")
 
 
-summary(LBC$age_at_dementia_diagnosis)
-
-ggplot(LBC1936, aes(x=ageyrs_death)) + geom_bar(position="dodge")
+summary(LBC$sbp1sit_w1)
+ggplot(LBC1936, aes(x=lonely_w1)) + geom_bar(position="dodge")
 hist(as.numeric(LBC$ageyrs_death))
 
 LBCtest <- LBC1936 %>%
@@ -335,3 +334,184 @@ varTable(sem_model_w1)
 lavInspect(sem_model_w1, "theta") 
 
 summary(LBC1936$age_at_dementia_diagnosis_w1)
+
+
+
+
+
+
+
+
+semmodel_w1 <- '
+
+cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
+choles =~ cholesbio + hichol_w1
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 + dbp1std_w1 + dbp2std_w1 + dbp3std_w1
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 + sbp1std_w1 + sbp2std_w1 + sbp3std_w1
+bpbio =~ dbp + sbp
+bp =~ bpbio + hibp_w1
+
+cardio =~ bld_crprot_w1 + cvdhist_w1
+
+diab =~ bld_hba1c_w1 + diab_w1
+
+choles ~ lonely_w1
+choles ~ sex
+choles ~ phyactiv_w1
+choles ~ hmsonum_w1
+choles ~ hadstot_w1
+choles ~ hiqual_w1
+
+bp ~ lonely_w1
+bp ~ sex
+bp ~ phyactiv_w1
+bp ~ hmsonum_w1
+bp ~ hadstot_w1
+bp ~ hiqual_w1
+
+cardio ~ lonely_w1
+cardio ~ sex
+cardio ~ phyactiv_w1
+cardio ~ hmsonum_w1
+cardio ~ hadstot_w1
+cardio ~ hiqual_w1
+
+diab ~ lonely_w1
+diab ~ sex
+diab ~ phyactiv_w1
+diab ~ hmsonum_w1
+diab ~ hadstot_w1
+diab ~ hiqual_w1
+
+stroke_mask_w2 ~ lonely_w1
+stroke_mask_w2 ~ sex
+stroke_mask_w2 ~ phyactiv_w1
+stroke_mask_w2 ~ hmsonum_w1
+stroke_mask_w2 ~ hadstot_w1
+stroke_mask_w2 ~ hiqual_w1
+
+dementia_code ~ lonely_w1
+dementia_code ~ sex
+dementia_code ~ phyactiv_w1
+dementia_code ~ hmsonum_w1
+dementia_code ~ hadstot_w1
+dementia_code ~ hiqual_w1
+
+
+phyactiv_w1 ~ a*lonely_w1
+
+cholesbio ~ lonely_w1
+cholesbio ~ sex
+cholesbio ~ phyactiv_w1
+cholesbio ~ hmsonum_w1
+cholesbio ~ hadstot_w1
+cholesbio ~ hiqual_w1
+
+bpbio ~ lonely_w1
+bpbio ~ sex
+bpbio ~ phyactiv_w1
+bpbio ~ hmsonum_w1
+bpbio ~ hadstot_w1
+bpbio ~ hiqual_w1
+
+bld_crprot_w1 ~ lonely_w1
+bld_crprot_w1 ~ sex
+bld_crprot_w1 ~ phyactiv_w1
+bld_crprot_w1 ~ hmsonum_w1
+bld_crprot_w1 ~ hadstot_w1
+bld_crprot_w1 ~ hiqual_w1
+
+bld_hba1c_w1 ~ lonely_w1
+bld_hba1c_w1 ~ sex
+bld_hba1c_w1 ~ phyactiv_w1
+bld_hba1c_w1 ~ hmsonum_w1
+bld_hba1c_w1 ~ hadstot_w1
+bld_hba1c_w1 ~ hiqual_w1
+
+
+
+
+hichol_w1 ~ lonely_w1
+hichol_w1 ~ sex
+hichol_w1 ~ phyactiv_w1
+hichol_w1 ~ hmsonum_w1
+hichol_w1 ~ hadstot_w1
+hichol_w1 ~ hiqual_w1
+
+hibp_w1 ~ lonely_w1
+hibp_w1 ~ sex
+hibp_w1 ~ phyactiv_w1
+hibp_w1 ~ hmsonum_w1
+hibp_w1 ~ hadstot_w1
+hibp_w1 ~ hiqual_w1
+
+cvdhist_w1 ~ lonely_w1
+cvdhist_w1 ~ sex
+cvdhist_w1 ~ phyactiv_w1
+cvdhist_w1 ~ hmsonum_w1
+cvdhist_w1 ~ hadstot_w1
+cvdhist_w1 ~ hiqual_w1
+
+diab_w1 ~ lonely_w1
+diab_w1 ~ sex
+diab_w1 ~ phyactiv_w1
+diab_w1 ~ hmsonum_w1
+diab_w1 ~ hadstot_w1
+diab_w1 ~ hiqual_w1
+
+
+
+
+
+cholesbio ~~ bpbio
+cholesbio ~~ bld_crprot_w1
+cholesbio ~~ bld_hba1c_w1
+cholesbio ~~ stroke_mask_w2
+cholesbio ~~ dementia_code
+
+bpbio ~~ bld_crprot_w1
+bpbio ~~ bld_hba1c_w1
+bpbio ~~ stroke_mask_w2
+bpbio ~~ dementia_code
+
+bld_crprot_w1 ~~ bld_hba1c_w1
+bld_crprot_w1 ~~ stroke_mask_w2
+bld_crprot_w1 ~~ dementia_code
+
+bld_hba1c_w1 ~~ stroke_mask_w2
+bld_hba1c_w1 ~~ dementia_code
+
+stroke_mask_w2 ~~ dementia_code
+
+hichol_w1 ~~ bpbio
+hichol_w1 ~~ bld_crprot_w1
+hichol_w1 ~~ bld_hba1c_w1
+hichol_w1 ~~ stroke_mask_w2
+hichol_w1 ~~ dementia_code
+
+hibp_w1 ~~ bld_crprot_w1
+hibp_w1 ~~ bld_hba1c_w1
+hibp_w1 ~~ stroke_mask_w2
+hibp_w1 ~~ dementia_code
+
+cvdhist_w1 ~~ bld_hba1c_w1
+cvdhist_w1 ~~ stroke_mask_w2
+cvdhist_w1 ~~ dementia_code
+
+diab_w1  ~~ stroke_mask_w2
+diab_w1  ~~ dementia_code
+
+
+
+
+#Indirect
+#ind2:=a*b
+
+#Total
+#TotalBio:=c+a*b
+
+
+
+
+'
