@@ -3,7 +3,7 @@
 #CFAs
 
 modelcholes <- '
-cholesbio =~ chol + hdl + trig 
+cholesbio =~ hdl + trig 
 choleself =~ hcheat + hcang  + hccor
 choles =~ cholesbio + choleself
 
@@ -52,7 +52,7 @@ modindices(modelfitbp, sort = T)
 modelcardio <-'
 cardiobio=~ hscrp 
 cardiorep =~ hcharth
-cardio =~ cardiobio + cardiorep 
+cardio =~ cardiobio + cardiorep  
 
 physical =~ i_vday + i_mday + i_wday
 
@@ -101,8 +101,7 @@ cholesbio =~ hdl + trig
 choleself =~ hcheat + hcang  + hccor 
 choles =~ cholesbio + choleself
 
-bpbio =~ omdiaval + omsysval
-bp =~ bpbio + hcbp
+bp =~ omdiaval + omsysval + hcbp
 
 cardio =~ hscrp + hcharth 
 
@@ -176,35 +175,20 @@ sem_model <- '
 
 cholesbio =~ hdl + trig 
 choleself =~ hcheat + hcang  + hccor 
-choles =~ cholesbio + choleself
+choles =~ choleself + cholesbio
 
-bpbio =~ omdiaval + omsysval
-bp =~ bpbio + hcbp
+bp =~ omdiaval + omsysval + hcbp
 
 cardio =~ hscrp + hcharth 
 
 diab =~ hba1c + hcdiab
 
-#chronic health index (higher values is having worse outcomes)
-#risk =~ choles + bp + cardio + diab
 
 #loneliness (higher values is being more lonely)
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 #physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
-
-#self report (higher values is having better outcomes)
-#self =~ i_sf12mcs_dv + i_sclfsato 
-
-
-#neuroticism
-#neuro =~ c_scptrt5n1 + c_scptrt5n2 + c_scptrt5n3
-
-#choles ~~ neuro
-#bp ~~ neuro
-#cardio ~~ neuro
-#diab ~~ neuro
 
 choles ~ i_dvage
 choles ~ i_sex
@@ -236,15 +220,6 @@ diab ~ i_finnow
 diab ~ b4*physical
 
 
-#self ~ i_dvage
-#self ~ i_sex
-#self ~ c4*lone
-#self ~ i_hhsize
-#self ~ i_finnow
-#self ~ b4*physical
-
-
-
 
 physical~a*lone
 
@@ -261,28 +236,40 @@ TotalBP:=c2+a*b2
 TotalCardio:=c3+a*b3
 TotalDiab:=c4+a*b4
 
+HealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
 
-LonelinessHealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
+#Biomarker covariances
+trig ~~ hba1c
+trig ~~ hscrp
+trig ~~ omdiaval
+trig ~~ omsysval
+hdl ~~ hba1c
+hdl ~~ hscrp
+hdl ~~ omdiaval 
+hdl ~~ omsysval
+hba1c ~~ hscrp
+hba1c ~~ omdiaval 
+hba1c ~~ omsysval
+hscrp ~~ omdiaval 
+hscrp ~~ omsysval 
 
-choleself ~~ hcbp
-choleself ~~ hcharth
-choleself ~~ hcdiab
 
-hcbp  ~~ hcharth
-hcbp  ~~ hcdiab
+#Self-Report Covariances
+hcheat ~~ hcbp
+hcheat ~~ hcharth
+hcheat ~~ hcdiab
+hcang ~~ hcbp
+hcang ~~ hcharth
+hcang ~~ hcdiab
+hccor ~~ hcbp
+hccor ~~ hcharth
+hccor ~~ hcdiab
+hcbp ~~ hcharth
+hcbp ~~ hcdiab
+hcharth ~~ hcdiab
 
-hcharth  ~~ hcdiab
 
-
-cholesbio ~~ bpbio
-cholesbio ~~ hscrp
-cholesbio ~~ hba1c
-
-bpbio ~~ hscrp
-bpbio ~~ hba1c
-
-hscrp ~~ hba1c
-
+lone  ~ i_finnow
 '
 
 
@@ -291,5 +278,5 @@ sem_modelfit <- sem(sem_model, USoc,
 summary(sem_modelfit, fit.measures = T, standardized =T, ci = T)
 modindices(sem_modelfit, sort = T)
 
-lavInspect(sem_modelfit, "cov.lv") 
-sem_modelfit@SampleStats@cov
+
+lavInspect(sem_modelfit, "cov.lv")
