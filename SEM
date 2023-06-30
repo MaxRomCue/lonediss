@@ -190,7 +190,7 @@ choles =~ cholesbio + hichol_w1
 
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
 sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
-bp =~ dbp + sbp + hibp_w1
+bp =~ dbp + sbp #+ hibp_w1
 
 cardio =~ cvdhist_w1
 
@@ -260,8 +260,8 @@ bld_hdlchol_w1 ~~ dbp
 
 #selfreport covariances
 hichol_w1 ~~ diab_w1
-hichol_w1 ~~ hibp_w1
-diab_w1 ~~ hibp_w1
+#hichol_w1 ~~ hibp_w1
+#diab_w1 ~~ hibp_w1
 
 
 
