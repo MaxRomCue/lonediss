@@ -1,5 +1,9 @@
 #SEM - US
 
+
+
+?select
+
 #CFAs
 
 modelcholes <- '
@@ -273,6 +277,7 @@ lone  ~ i_finnow
 '
 
 
+
 sem_modelfit <- sem(sem_model, USoc, 
                 missing = 'FIML')
 summary(sem_modelfit, fit.measures = T, standardized =T, ci = T)
@@ -280,3 +285,15 @@ modindices(sem_modelfit, sort = T)
 
 
 lavInspect(sem_modelfit, "cov.lv")
+
+
+USoc %>% 
+  select(starts_with("i")) %>% 
+  describe %>% 
+  as.data.frame() %>%
+  rownames_to_column(., var = "variable") %>% 
+  select(variable,n, mean,sd,skew,kurtosis) %>%
+  kable(digits = 2) %>%
+  kable_styling(full_width = FALSE)
+
+?select
