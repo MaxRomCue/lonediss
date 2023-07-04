@@ -34,7 +34,8 @@ kable(LBC %>% # getting data
 
 
 kable(LBC1936 %>% # getting data 
-        group_by(hibp_w1) %>% # grouping by age_stage
+        group_by(bld_hba1c_w1) %>% # grouping by age_stage
+        filter(!is.na(bld_hba1c_w1))%>%
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -101,7 +102,7 @@ LBC1936 <-
     sbp3std_w1 = ifelse(sbp3std_w1>=140, 1, sbp3std_w1),
     
 
-    # dementia... what to do?
+    # dementia
     dementia_code = ifelse(dementia_code>1, NA, dementia_code),
     age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis<=72, 1, age_at_dementia_diagnosis),
     age_at_dementia_diagnosis_w1 = ifelse(age_at_dementia_diagnosis>72, 0, age_at_dementia_diagnosis),
@@ -169,7 +170,7 @@ LBC1936$lonely_w1 <- recode(reverselone1, "1=4; 2=4; 3=3; 4=2;5=1")#reverse code
 
 
 
-ggplot(LBC, aes(sbp2std_w1, cvdhist_w1))+#SOME ARE REVERSE CODED?
+ggplot(LBC, aes(sbp2std_w1, cvdhist_w1))+
   geom_point()+
   geom_smooth(method="glm")
 
