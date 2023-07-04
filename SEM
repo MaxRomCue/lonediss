@@ -1,8 +1,8 @@
-LBCtest %>%
+LBC1936 %>%
   describe %>%
   as.data.frame() %>%
   rownames_to_column(., var = "variable")%>%
-  select(variable, mean, sd, skew, kurtosis)%>%
+  select(variable, n, mean, sd, skew, kurtosis)%>%
   kable(digits = 2)%>%
   kable_styling(full_width = F)
 
@@ -190,15 +190,12 @@ choles =~ cholesbio + hichol_w1
 
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
 sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
-bp =~ dbp + sbp #+ hibp_w1
+bp =~ dbp + sbp 
 
 cardio =~ cvdhist_w1
 
 diab =~ bld_hba1c_w1 + diab_w1
 
-#stroke =~ stroke_mask_w2
-
-#demen =~ dementia_code
 
 choles ~ lonely_w1
 choles ~ sex
@@ -228,19 +225,7 @@ diab ~ hmsonum_w1
 diab ~ hadstot_w1
 diab ~ hiqual_w1
 
-#stroke ~ lonely_w1
-#stroke ~ sex
-#stroke ~ phyactiv_w1
-#stroke ~ hmsonum_w1
-#stroke ~ hadstot_w1
-#stroke ~ hiqual_w1
 
-#demen ~ lonely_w1
-#demen ~ sex
-#demen ~ phyactiv_w1
-#demen ~ hmsonum_w1
-#demen ~ hadstot_w1
-#demen ~ hiqual_w1
 
 
 #biomarkers covariances
@@ -257,17 +242,13 @@ bld_hdlchol_w1 ~~ dbp
 
 
 
-
 #selfreport covariances
 hichol_w1 ~~ diab_w1
 #hichol_w1 ~~ hibp_w1
 #diab_w1 ~~ hibp_w1
 
-
-
-
-#phyactiv_w1 ~ lonely_w1
-
+phyactiv_w1 ~ lonely_w1
+#lonely_w1 ~ livealn_w1
 
 #Indirect
 #ind2:=a*b
