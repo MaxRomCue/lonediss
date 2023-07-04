@@ -9,14 +9,14 @@ library(lavaan)
 library(semPlot)
 
 
+
 i_indresp <- read_sav("Downloads/UKDA-6614-spss/spss/spss25/ukhls/i_indresp.sav")
-clocks <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xepigen_clocks_ns.sav")
 blood <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xlabblood_ns.sav")
 x_indresp <- read_sav("Downloads/UKDA-7251-spss/spss/spss25/xindresp_ns.sav")
 
 
 #plots
-ggplot(USoc, aes(x=hscrp)) + geom_bar(position="dodge")
+ggplot(USoc, aes(x=i_sclonely)) + geom_bar(position="dodge")
 
 
 
@@ -27,19 +27,19 @@ hist(as.numeric(blood$trig))
 
 
 
-kable(c_indresp %>% # getting data 
-    group_by(c_scptrt5n2) %>% # grouping by age_stage
-    filter(!is.na(c_scptrt5n2)) %>%
-    filter(c_scptrt5n2>0)%>%
+kable(USoc %>% # getting data 
+    group_by(i_sclonely) %>% # grouping by age_stage
+    filter(!is.na(i_sclonely)) %>%
+    filter(i_sclonely>0)%>%
       summarise(cnt = n()) %>% # counting how many by group of age_stage
   mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
 
 
 
-kable(c_indresp %>% # getting data 
-        group_by(c_scptrt5n2) %>% # grouping by age_stage
-        filter(!is.na(c_scptrt5n2)) %>%
+kable(USoc %>% # getting data 
+        group_by(hba1c) %>% # grouping by age_stage
+        filter(!is.na(hba1c)) %>%
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2))) %>%# getting frequency
   kable_styling()
@@ -71,7 +71,7 @@ bioUS <-
     chol = ifelse(chol<=6.2, 0, chol),#Total Cholesterol (n = 22%) - almost same as LBC
     chol = ifelse(chol>6.2, 1, chol),
     hdl = ifelse(hdl<0, NA_real_, hdl),#NA
-    hdl = ifelse(hdl<=1, 1, hdl),#LDL Cholesterol (n = 12%) - more than LBC
+    hdl = ifelse(hdl<=1, 1, hdl),#HDL Cholesterol (n = 12%) - more than LBC
     hdl = ifelse(hdl>1, 0, hdl),
     trig = ifelse(trig<0, NA, trig),#NA
     trig = ifelse(trig<2, 0, trig),#Trygliceryde (n = 32%) - more than LBC
@@ -389,6 +389,7 @@ summary(modelself)
 
 modelselfbi <- glm(selfoutcome ~ i_sclonely * (i_hhsize + i_vday + i_mday + i_wday) + i_dvage + i_sex  + i_finnow, USoc,
                    family = binomial(link = "logit"))
-summary(modelselfbi)
+summary(USoc$hccor)
   
 plot_model(modelself, type = "slope")
+
