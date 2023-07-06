@@ -23,7 +23,8 @@ choles ~ i_hhsize
 
 
 #added co-variances
-#lone  ~    i_finnow
+lone  ~    i_finnow
+physical~a*lone
 
 '
 modelfitcholes <- cfa(modelcholes, USoc, std.lv = T)
@@ -46,6 +47,10 @@ bp ~ i_finnow
 bp ~ physical
 bp ~ i_hhsize
 
+lone  ~    i_finnow
+physical~a*lone
+
+
 '
 modelfitbp <- cfa(modelbp, USoc, std.lv = T)
 summary(modelfitbp, fit = T, standardized = T)
@@ -54,15 +59,23 @@ modindices(modelfitbp, sort = T)
 
 
 modelcardio <-'
-cardiobio=~ hscrp 
-cardiorep =~ hcharth
-cardio =~ cardiobio + cardiorep  
+#cardiobio=~ hscrp 
+#cardiorep =~ hcharth
+cardio =~ hscrp + hcharth  
 
 physical =~ i_vday + i_mday + i_wday
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
 
 cardio ~ i_dvage
 cardio ~ i_sex 
 cardio ~ physical
+cardio ~ i_finnow
+cardio ~ i_hhsize
+cardio ~ lone
+
+lone  ~    i_finnow
+physical~a*lone
 
 ' 
 modelfitcardio <- cfa(modelcardio, USoc, std.lv = T)
@@ -74,10 +87,19 @@ modeldiab <-'
 diab =~ hba1c + hcdiab
 
 physical =~ i_vday + i_mday + i_wday
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 diab ~ i_dvage
 diab ~ i_sex 
 diab ~ physical
+diab ~ i_finnow
+diab ~ i_hhsize
+diab ~ lone
+
+lone  ~    i_finnow
+physical~a*lone
+
+
 '
 modelfitdiab <- cfa(modeldiab, USoc, std.lv = T)
 summary(modelfitdiab, fit = T, standardized = T)
