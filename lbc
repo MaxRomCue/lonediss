@@ -16,8 +16,8 @@ library(semPlot)
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_14JUN2023.sav")
 
 
-summary(LBC$sbp1sit_w1)
-ggplot(LBC1936, aes(x=lonely_w1)) + geom_bar(position="dodge")
+summary(LBC1936$sex)
+ggplot(LBC1936, aes(x=hibp_w1)) + geom_bar(position="dodge")
 hist(as.numeric(LBC$ageyrs_death))
 
 LBCtest <- LBC1936 %>%
@@ -34,8 +34,8 @@ kable(LBC %>% # getting data
 
 
 kable(LBC1936 %>% # getting data 
-        group_by(bld_hba1c_w1) %>% # grouping by age_stage
-        filter(!is.na(bld_hba1c_w1))%>%
+        group_by(hibp_w1) %>% # grouping by age_stage
+        filter(!is.na(hibp_w1))%>%
         summarise(cnt = n()) %>% # counting how many by group of age_stage
         mutate(props = round(cnt / sum(cnt), 2)), n= 31)%>%# getting frequency
   kable_styling()
@@ -50,6 +50,10 @@ LBC %>%
 
 ggpairs(LBCtest, title="All variables")
 
+
+summary(LBC$dbp1sit_w1)
+summary(LBC$hadsa_w1)
+summary(LBC$hadsd_w1)
 
 LBC1936 <- 
   LBC %>%
@@ -132,6 +136,11 @@ LBC1936 <-
     #covar wave 1
     hadstot_w1 = ifelse(hadstot_w1<8, 0, hadstot_w1),
     hadstot_w1 = ifelse(hadstot_w1>=8, 1, hadstot_w1),
+    #hadsa_w1 = ifelse(hadsa_w1<8, 0, hadsa_w1),
+    #hadsa_w1 = ifelse(hadsa_w1>=8, 1, hadsa_w1),
+    #hadsd_w1 = ifelse(hadsd_w1<8, 0, hadsd_w1),
+    #hadsd_w1 = ifelse(hadsd_w1>=8, 1, hadsd_w1),
+    
     agedays_w1 = agedays_w1/365,
     
     #covar wave 2
