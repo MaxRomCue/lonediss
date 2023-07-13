@@ -1,9 +1,6 @@
 #SEM - US
 
 
-
-?select
-
 #CFAs
 
 modelcholes <- '
@@ -23,19 +20,20 @@ choles ~ i_hhsize
 
 
 #added co-variances
-lone  ~    i_finnow
-physical~a*lone
+#lone  ~    i_finnow
+#physical~a*lone
 
 '
 modelfitcholes <- cfa(modelcholes, USoc, std.lv = T)
 summary(modelfitcholes, fit = T, standardized = T)
 modindices(modelfitcholes, sort = T)
+semPaths(modelfitcholes, what = "stand")
+
 
 
 modelbp <-'
 bpbio =~ omdiaval + omsysval
-bpself =~ hcbp 
-bp =~ bpbio + bpself
+bp =~ bpbio + hcbp
 
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 physical =~ i_vday + i_mday + i_wday
@@ -47,8 +45,8 @@ bp ~ i_finnow
 bp ~ physical
 bp ~ i_hhsize
 
-lone  ~    i_finnow
-physical~a*lone
+#lone  ~    i_finnow
+#physical~a*lone
 
 
 '
@@ -59,8 +57,6 @@ modindices(modelfitbp, sort = T)
 
 
 modelcardio <-'
-#cardiobio=~ hscrp 
-#cardiorep =~ hcharth
 cardio =~ hscrp + hcharth  
 
 physical =~ i_vday + i_mday + i_wday
@@ -74,8 +70,8 @@ cardio ~ i_finnow
 cardio ~ i_hhsize
 cardio ~ lone
 
-lone  ~    i_finnow
-physical~a*lone
+#lone  ~    i_finnow
+#physical~a*lone
 
 ' 
 modelfitcardio <- cfa(modelcardio, USoc, std.lv = T)
@@ -96,8 +92,8 @@ diab ~ i_finnow
 diab ~ i_hhsize
 diab ~ lone
 
-lone  ~    i_finnow
-physical~a*lone
+#lone  ~    i_finnow
+#physical~a*lone
 
 
 '
@@ -125,7 +121,7 @@ test <- '
 
 cholesbio =~ hdl + trig 
 choleself =~ hcheat + hcang  + hccor 
-choles =~ cholesbio + choleself
+choles =~ choleself + cholesbio
 
 bp =~ omdiaval + omsysval + hcbp
 
@@ -133,8 +129,162 @@ cardio =~ hscrp + hcharth
 
 diab =~ hba1c + hcdiab
 
-#chronic health index (higher values is having worse outcomes)
-risk =~ choles + bp + cardio + diab
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
+
+choles ~ lone
+choles ~ i_dvage
+choles ~ i_sex
+
+
+
+bp ~ lone
+bp ~ i_dvage
+bp ~ i_sex
+
+
+cardio ~ lone
+cardio ~ i_dvage
+cardio ~ i_sex
+
+
+diab ~ lone
+diab ~ i_dvage
+diab ~ i_sex
+
+
+#Biomarker covariances
+trig ~~ hba1c
+trig ~~ hscrp
+trig ~~ omdiaval
+trig ~~ omsysval
+hdl ~~ hba1c
+hdl ~~ hscrp
+hdl ~~ omdiaval 
+hdl ~~ omsysval
+hba1c ~~ hscrp
+hba1c ~~ omdiaval 
+hba1c ~~ omsysval
+hscrp ~~ omdiaval 
+hscrp ~~ omsysval 
+
+
+#Self-Report Covariances
+hcheat ~~ hcbp
+hcheat ~~ hcharth
+hcheat ~~ hcdiab
+hcang ~~ hcbp
+hcang ~~ hcharth
+hcang ~~ hcdiab
+hccor ~~ hcbp
+hccor ~~ hcharth
+hccor ~~ hcdiab
+hcbp ~~ hcharth
+hcbp ~~ hcdiab
+hcharth ~~ hcdiab
+
+'
+
+test_fit <- sem(test, USoc, 
+                missing = 'FIML')
+summary(test_fit, fit.measures = T, standardized =T, ci = T)
+
+
+test2 <- '
+
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
+choles =~ choleself + cholesbio
+
+bp =~ omdiaval + omsysval + hcbp
+
+cardio =~ hscrp + hcharth 
+
+diab =~ hba1c + hcdiab
+
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
+
+choles ~ lone
+choles ~ i_dvage
+choles ~ i_sex
+choles ~ i_finnow
+
+
+
+bp ~ lone
+bp ~ i_dvage
+bp ~ i_sex
+bp ~ i_finnow
+
+
+cardio ~ lone
+cardio ~ i_dvage
+cardio ~ i_sex
+cardio ~ i_finnow
+
+
+diab ~ lone
+diab ~ i_dvage
+diab ~ i_sex
+diab ~ i_finnow
+
+
+#Biomarker covariances
+trig ~~ hba1c
+trig ~~ hscrp
+trig ~~ omdiaval
+trig ~~ omsysval
+hdl ~~ hba1c
+hdl ~~ hscrp
+hdl ~~ omdiaval 
+hdl ~~ omsysval
+hba1c ~~ hscrp
+hba1c ~~ omdiaval 
+hba1c ~~ omsysval
+hscrp ~~ omdiaval 
+hscrp ~~ omsysval 
+
+
+#Self-Report Covariances
+hcheat ~~ hcbp
+hcheat ~~ hcharth
+hcheat ~~ hcdiab
+hcang ~~ hcbp
+hcang ~~ hcharth
+hcang ~~ hcdiab
+hccor ~~ hcbp
+hccor ~~ hcharth
+hccor ~~ hcdiab
+hcbp ~~ hcharth
+hcbp ~~ hcdiab
+hcharth ~~ hcdiab
+
+
+
+'
+
+test_fit2 <- sem(test2, USoc, 
+                missing = 'FIML')
+summary(test_fit2, fit.measures = T, standardized =T, ci = T)
+
+
+test3 <- '
+
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
+choles =~ choleself + cholesbio
+
+bp =~ omdiaval + omsysval + hcbp
+
+cardio =~ hscrp + hcharth 
+
+diab =~ hba1c + hcdiab
+
 
 #loneliness (higher values is being more lonely)
 lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
@@ -142,58 +292,163 @@ lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 #physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
 
-#self report (higher values is having better outcomes)
-#selfphy =~ i_sf12pcs_dv + i_sf12mcs_dv + i_health
-self =~ i_sf12mcs_dv + i_sclfsato 
+
+choles ~ lone
+choles ~ i_dvage
+choles ~ i_sex
+choles ~ i_finnow
+choles ~ physical
 
 
-#neuroticism
-neuro =~ c_scptrt5n1 + c_scptrt5n2 + c_scptrt5n3
 
-risk ~~ neuro
-self ~~ neuro
+bp ~ lone
+bp ~ i_dvage
+bp ~ i_sex
+bp ~ i_finnow
+bp ~ physical
 
 
-risk ~ i_dvage
-risk ~ i_sex
-risk ~ c2*lone
-risk ~ i_hhsize
-risk ~ i_finnow
-risk ~ b2*physical
+cardio ~ lone
+cardio ~ i_dvage
+cardio ~ i_sex
+cardio ~ i_finnow
+cardio ~ physical
 
-self ~ i_dvage
-self ~ i_sex
-self ~ c1*lone
-self ~ i_hhsize
-self ~ i_finnow
-self ~ b1*physical
 
-bio =~ cholesbio + bpbio + hscrp + hba1c 
+diab ~ lone
+diab ~ i_dvage
+diab ~ i_sex
+diab ~ i_finnow
+diab ~ physical
 
-bio ~ lone
-bio ~ i_sex
-bio ~ i_dvage
 
-physical~a2*lone
+#Biomarker covariances
+trig ~~ hba1c
+trig ~~ hscrp
+trig ~~ omdiaval
+trig ~~ omsysval
+hdl ~~ hba1c
+hdl ~~ hscrp
+hdl ~~ omdiaval 
+hdl ~~ omsysval
+hba1c ~~ hscrp
+hba1c ~~ omdiaval 
+hba1c ~~ omsysval
+hscrp ~~ omdiaval 
+hscrp ~~ omsysval 
 
-#Indirect
-ind2:=a2*b2
 
-#Total
-TotalSelf:=c1+a2*b1
-TotalBio:=c2+a2*b2
+#Self-Report Covariances
+hcheat ~~ hcbp
+hcheat ~~ hcharth
+hcheat ~~ hcdiab
+hcang ~~ hcbp
+hcang ~~ hcharth
+hcang ~~ hcdiab
+hccor ~~ hcbp
+hccor ~~ hcharth
+hccor ~~ hcdiab
+hcbp ~~ hcharth
+hcbp ~~ hcdiab
+hcharth ~~ hcdiab
 
-Total:=TotalSelf - TotalBio
 
-#MODINDICES
-#lone  ~     i_finnow
+
 '
+test_fit3 <- sem(test3, USoc, 
+                 missing = 'FIML')
+summary(test_fit3, fit.measures = T, standardized =T, ci = T)
 
-test_fit <- sem(test, USoc, 
-                missing = 'FIML')
-summary(test_fit, fit.measures = T, standardized =T, ci = T)
-modindices(test_fit, sort = T)
+test4 <- '
 
+cholesbio =~ hdl + trig 
+choleself =~ hcheat + hcang  + hccor 
+choles =~ choleself + cholesbio
+
+bp =~ omdiaval + omsysval + hcbp
+
+cardio =~ hscrp + hcharth 
+
+diab =~ hba1c + hcdiab
+
+
+#loneliness (higher values is being more lonely)
+lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
+
+#physical activity (higher values is exercising more)
+physical =~ i_vday + i_mday + i_wday
+
+
+choles ~ lone
+choles ~ i_dvage
+choles ~ i_sex
+choles ~ i_finnow
+choles ~ physical
+choles ~ i_hhsize
+
+
+
+
+bp ~ lone
+bp ~ i_dvage
+bp ~ i_sex
+bp ~ i_finnow
+bp ~ physical
+bp ~ i_hhsize
+
+
+cardio ~ lone
+cardio ~ i_dvage
+cardio ~ i_sex
+cardio ~ i_finnow
+cardio ~ physical
+cardio ~ i_hhsize
+
+
+diab ~ lone
+diab ~ i_dvage
+diab ~ i_sex
+diab ~ i_finnow
+diab ~ physical
+diab ~ i_hhsize
+
+
+#Biomarker covariances
+trig ~~ hba1c
+trig ~~ hscrp
+trig ~~ omdiaval
+trig ~~ omsysval
+hdl ~~ hba1c
+hdl ~~ hscrp
+hdl ~~ omdiaval 
+hdl ~~ omsysval
+hba1c ~~ hscrp
+hba1c ~~ omdiaval 
+hba1c ~~ omsysval
+hscrp ~~ omdiaval 
+hscrp ~~ omsysval 
+
+
+#Self-Report Covariances
+hcheat ~~ hcbp
+hcheat ~~ hcharth
+hcheat ~~ hcdiab
+hcang ~~ hcbp
+hcang ~~ hcharth
+hcang ~~ hcdiab
+hccor ~~ hcbp
+hccor ~~ hcharth
+hccor ~~ hcdiab
+hcbp ~~ hcharth
+hcbp ~~ hcdiab
+hcharth ~~ hcdiab
+
+
+
+'
+test_fit4 <- sem(test4, USoc, 
+                 missing = 'FIML')
+summary(test_fit4, fit.measures = T, standardized =T, ci = T)
 
 
 
@@ -247,22 +502,8 @@ diab ~ b4*physical
 
 
 
-physical~a*lone
+lone~i_finnow
 
-#Indirect
-Indcholes:=a*b1
-Indbp:=a*b2
-Indcardio:=a*b3
-Inddiab:=a*b4
-
-
-#Total
-TotalCholes:=c1+a*b1
-TotalBP:=c2+a*b2
-TotalCardio:=c3+a*b3
-TotalDiab:=c4+a*b4
-
-HealthIndex:=TotalCholes + TotalBP + TotalCardio + TotalDiab
 
 #Biomarker covariances
 trig ~~ hba1c
@@ -295,15 +536,16 @@ hcbp ~~ hcdiab
 hcharth ~~ hcdiab
 
 
-lone  ~ i_finnow
 '
 
 
 
-sem_modelfit <- sem(sem_model, USoc, 
+sem_modelfit <- sem(sem_model, USoc,
                 missing = 'FIML')
 summary(sem_modelfit, fit.measures = T, standardized =T, ci = T)
 modindices(sem_modelfit, sort = T)
+
+semPaths(sem_modelfit, what = "stand")
 
 
 lavInspect(sem_modelfit, "cov.lv")
@@ -318,4 +560,4 @@ USoc %>%
   kable(digits = 2) %>%
   kable_styling(full_width = FALSE)
 
-?select
+citation()
