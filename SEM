@@ -104,39 +104,8 @@ modindices(modelfitdiab, sort = T)
 
 
 
-modelstroke <-'stroke =~ stroke_mask_w2
-
-stroke ~ sex
-stroke ~ lonely_w1
-stroke ~ livealn_w1
-stroke ~ hiqual_w1
-stroke ~ phyactiv_w1
-stroke ~ hmsonum_w1
-stroke ~ hadstot_w1'
-modelfitstroke <- cfa(modelstroke, LBC1936, std.lv = T)
-summary(modelfitstroke, fit = T, standardized = T)
-modindices(modelfitstroke, sort = T)
-
-
-modeldemen <-'dementia =~ dementia_code
-
-
-dementia ~ sex
-dementia ~ lonely_w1
-dementia ~ livealn_w1
-dementia ~ hiqual_w1
-dementia ~ phyactiv_w1
-dementia ~ hmsonum_w1
-dementia ~ hadstot_w1
-'
-modelfitdemen <- cfa(modeldemen, LBC1936, std.lv = T)
-summary(modelfitdemen, fit = T, standardized = T)
-modindices(modelfitdemen, sort = T)
-
-
 #SEM 
-
-semmodel_w1 <- '
+sem_model1 <- '
 
 cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
 choles =~ cholesbio + hichol_w1
@@ -152,35 +121,17 @@ diab =~ bld_hba1c_w1 + diab_w1
 
 choles ~ lonely_w1
 choles ~ sex
-choles ~ phyactiv_w1
-choles ~ hmsonum_w1
-choles ~ hadsd_w1
-choles ~ hadsa_w1
-choles ~ hiqual_w1
+
 
 bp ~ lonely_w1
 bp ~ sex
-bp ~ phyactiv_w1
-bp ~ hmsonum_w1
-bp ~ hadsd_w1
-bp ~ hadsa_w1
-bp ~ hiqual_w1
+
 
 cardio ~ lonely_w1
 cardio ~ sex
-cardio ~ phyactiv_w1
-cardio ~ hmsonum_w1
-cardio ~ hadsd_w1
-cardio ~ hadsa_w1
-cardio ~ hiqual_w1
 
 diab ~ lonely_w1
 diab ~ sex
-diab ~ phyactiv_w1
-diab ~ hmsonum_w1
-diab ~ hadsd_w1
-diab ~ hadsa_w1
-diab ~ hiqual_w1
 
 
 
@@ -200,16 +151,285 @@ bld_hdlchol_w1 ~~ dbp
 
 #selfreport covariances
 hichol_w1 ~~ diab_w1
-#hichol_w1 ~~ hibp_w1
-#diab_w1 ~~ hibp_w1
+'
+sem_model_1 <- sem(sem_model1, LBC1936, 
+                    missing = 'FIML')
+summary(sem_model_1, fit.measures = T, standardized =T, ci = T)
 
 
-#Indirect
-#ind2:=a*b
 
-#Total
-#TotalBio:=c+a*b
+sem_model2 <- '
 
+cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
+choles =~ cholesbio + hichol_w1
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
+bp =~ dbp + sbp
+
+cardio =~ cvdhist_w1
+
+diab =~ bld_hba1c_w1 + diab_w1
+
+
+choles ~ lonely_w1
+choles ~ sex
+choles ~ hmsonum_w1
+choles ~ hiqual_w1
+
+
+
+bp ~ lonely_w1
+bp ~ sex
+bp ~ hmsonum_w1
+bp ~ hiqual_w1
+
+cardio ~ lonely_w1
+cardio ~ sex
+cardio ~ hmsonum_w1
+cardio ~ hiqual_w1
+
+diab ~ lonely_w1
+diab ~ sex
+diab ~ hmsonum_w1
+diab ~ hiqual_w1
+
+
+
+#biomarkers covariances
+bld_triglyc_w1 ~~ bld_hba1c_w1
+bld_triglyc_w1 ~~ dbp
+bld_hdlchol_w1 ~~ bld_hba1c_w1
+bld_hdlchol_w1 ~~ sbp
+bld_hba1c_w1 ~~ dbp
+bld_hba1c_w1 ~~ sbp
+
+bld_triglyc_w1  ~~ sbp
+bld_hdlchol_w1 ~~ dbp
+
+
+
+#selfreport covariances
+hichol_w1 ~~ diab_w1
+'
+sem_model_2 <- sem(sem_model2, LBC1936, 
+                   missing = 'FIML')
+summary(sem_model_2, fit.measures = T, standardized =T, ci = T)
+
+
+sem_model3 <- '
+
+cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
+choles =~ cholesbio + hichol_w1
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
+bp =~ dbp + sbp
+
+cardio =~ cvdhist_w1
+
+diab =~ bld_hba1c_w1 + diab_w1
+
+
+choles ~ lonely_w1
+choles ~ sex
+choles ~ hmsonum_w1
+choles ~ hiqual_w1
+choles ~ phyactiv_w1
+
+
+
+
+bp ~ lonely_w1
+bp ~ sex
+bp ~ hmsonum_w1
+bp ~ hiqual_w1
+bp ~ phyactiv_w1
+
+
+cardio ~ lonely_w1
+cardio ~ sex
+cardio ~ hmsonum_w1
+cardio ~ hiqual_w1
+cardio ~ phyactiv_w1
+
+
+diab ~ lonely_w1
+diab ~ sex
+diab ~ hmsonum_w1
+diab ~ hiqual_w1
+diab ~ phyactiv_w1
+
+
+
+#biomarkers covariances
+bld_triglyc_w1 ~~ bld_hba1c_w1
+bld_triglyc_w1 ~~ dbp
+bld_hdlchol_w1 ~~ bld_hba1c_w1
+bld_hdlchol_w1 ~~ sbp
+bld_hba1c_w1 ~~ dbp
+bld_hba1c_w1 ~~ sbp
+
+bld_triglyc_w1  ~~ sbp
+bld_hdlchol_w1 ~~ dbp
+
+
+
+#selfreport covariances
+hichol_w1 ~~ diab_w1
+'
+sem_model_3 <- sem(sem_model3, LBC1936, 
+                   missing = 'FIML')
+summary(sem_model_3, fit.measures = T, standardized =T, ci = T)
+
+sem_model4 <- '
+
+cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
+choles =~ cholesbio + hichol_w1
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
+bp =~ dbp + sbp
+
+cardio =~ cvdhist_w1
+
+diab =~ bld_hba1c_w1 + diab_w1
+
+
+choles ~ lonely_w1
+choles ~ sex
+choles ~ hmsonum_w1
+choles ~ hiqual_w1
+choles ~ phyactiv_w1
+choles ~ livealn_w1
+
+
+
+
+bp ~ lonely_w1
+bp ~ sex
+bp ~ hmsonum_w1
+bp ~ hiqual_w1
+bp ~ phyactiv_w1
+bp ~ livealn_w1
+
+
+cardio ~ lonely_w1
+cardio ~ sex
+cardio ~ hmsonum_w1
+cardio ~ hiqual_w1
+cardio ~ phyactiv_w1
+cardio ~ livealn_w1
+
+
+diab ~ lonely_w1
+diab ~ sex
+diab ~ hmsonum_w1
+diab ~ hiqual_w1
+diab ~ phyactiv_w1
+diab ~ livealn_w1
+
+
+
+#biomarkers covariances
+bld_triglyc_w1 ~~ bld_hba1c_w1
+bld_triglyc_w1 ~~ dbp
+bld_hdlchol_w1 ~~ bld_hba1c_w1
+bld_hdlchol_w1 ~~ sbp
+bld_hba1c_w1 ~~ dbp
+bld_hba1c_w1 ~~ sbp
+
+bld_triglyc_w1  ~~ sbp
+bld_hdlchol_w1 ~~ dbp
+
+
+
+#selfreport covariances
+hichol_w1 ~~ diab_w1
+
+lonely_w1 ~ livealn_w1
+
+'
+sem_model_4 <- sem(sem_model4, LBC1936, 
+                   missing = 'FIML')
+summary(sem_model_4, fit.measures = T, standardized =T, ci = T)
+
+semmodel_w1 <- '
+
+cholesbio =~ bld_hdlchol_w1 + bld_triglyc_w1
+choles =~ cholesbio + hichol_w1
+
+dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1 
+sbp =~ sbp1sit_w1 + sbp2sit_w1 + sbp3sit_w1 
+bp =~ dbp + sbp
+
+cardio =~ cvdhist_w1
+
+diab =~ bld_hba1c_w1 + diab_w1
+
+choles ~ lonely_w1
+choles ~ sex
+choles ~ hmsonum_w1
+choles ~ hiqual_w1
+choles ~ phyactiv_w1
+choles ~ livealn_w1
+choles ~ hadsd_w1
+choles ~ hadsa_w1
+
+
+
+bp ~ lonely_w1
+bp ~ sex
+bp ~ hmsonum_w1
+bp ~ hiqual_w1
+bp ~ phyactiv_w1
+bp ~ livealn_w1
+bp ~ hadsd_w1
+bp ~ hadsa_w1
+
+cardio ~ lonely_w1
+cardio ~ sex
+cardio ~ hmsonum_w1
+cardio ~ hiqual_w1
+cardio ~ phyactiv_w1
+cardio ~ livealn_w1
+cardio ~ hadsd_w1
+cardio ~ hadsa_w1
+
+
+diab ~ lonely_w1
+diab ~ sex
+diab ~ hmsonum_w1
+diab ~ hiqual_w1
+diab ~ phyactiv_w1
+diab ~ livealn_w1
+diab ~ hadsd_w1
+diab ~ hadsa_w1
+
+
+
+
+
+
+
+#biomarkers covariances
+bld_triglyc_w1 ~~ bld_hba1c_w1
+bld_triglyc_w1 ~~ dbp
+bld_hdlchol_w1 ~~ bld_hba1c_w1
+bld_hdlchol_w1 ~~ sbp
+bld_hba1c_w1 ~~ dbp
+bld_hba1c_w1 ~~ sbp
+
+bld_triglyc_w1  ~~ sbp
+bld_hdlchol_w1 ~~ dbp
+
+
+
+#selfreport covariances
+hichol_w1 ~~ diab_w1
+
+
+lonely_w1 ~ livealn_w1
 lonely_w1 ~ hadsd_w1
 lonely_w1 ~ hadsa_w1
 
@@ -222,11 +442,6 @@ summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
 
 
 
-covariancsemPaths(sem_model_w1, what='paths')
-modindices(sem_model_w1, sort = T)
-
-lavInspect(sem_model_w1, "cov.lv")
-lavInspect(sem_model_w1, "theta") 
 
 standardizedSolution(sem_model_w1, type = "std.all", se = TRUE, zstat = TRUE, 
                      pvalue = TRUE, ci = TRUE, level = 0.95, cov.std = TRUE, 
