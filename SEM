@@ -35,11 +35,11 @@ choles ~ hadsa_w1
 
 
 '
-modelfitcholes <- cfa(modelcholes, LBC1936, std.lv = T)
+modelfitcholes <- cfa(modelcholes, LBC1936, std.lv = T, 
+                      missing = 'FIML')
 summary(modelfitcholes, fit = T, standardized = T)
 modindices(modelfitcholes, sort = T)
 
-summary(LBC$bld_crprot_w1)
 
 modelbp <-'
 dbp =~ dbp1sit_w1 + dbp2sit_w1 + dbp3sit_w1
@@ -59,10 +59,10 @@ bp ~ hadsa_w1
 
 
 '
-modelfitbp <- cfa(modelbp, LBC1936, std.lv = T)
+modelfitbp <- cfa(modelbp, LBC1936, std.lv = T,
+                  missing = 'FIML')
 summary(modelfitbp, fit = T, standardized = T)
-modindices(modelfitbp, sort = T)
-semPaths(modelfitbp, what="paths")
+
 
 modelcardio <-'
 cardio =~ bld_crprot_w1 + cvdhist_w1  
@@ -80,9 +80,10 @@ cardio ~ hadsa_w1
 
 
 '
-modelfitcardio <- cfa(modelcardio, LBC1936, std.lv = T)
+modelfitcardio <- cfa(modelcardio, LBC1936, std.lv = T,
+                      missing = 'FIML')
 summary(modelfitcardio, fit = T, standardized = T)
-modindices(modelfitcardio, sort = T)
+
 
 modeldiab <-'
 diab =~ bld_hba1c_w1 + diab_w1
@@ -98,9 +99,9 @@ diab ~ hadsa_w1
 
 
 '
-modelfitdiab <- cfa(modeldiab, LBC1936, std.lv = T)
+modelfitdiab <- cfa(modeldiab, LBC1936, std.lv = T,
+                    missing = 'FIML')
 summary(modelfitdiab, fit = T, standardized = T)
-modindices(modelfitdiab, sort = T)
 
 
 
