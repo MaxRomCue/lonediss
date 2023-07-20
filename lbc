@@ -16,7 +16,7 @@ library(semPlot)
 LBC <- read_sav("~/Win7/Desktop/LBC1936_LonelinessAndPhysicalHealthCorrelates_MRC_14JUN2023.sav")
 
 
-summary(LBC1936$sex)
+summary(LBC1936$livealn_w1)
 ggplot(LBC1936, aes(x=hibp_w1)) + geom_bar(position="dodge")
 hist(as.numeric(LBC$ageyrs_death))
 
