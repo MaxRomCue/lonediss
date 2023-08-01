@@ -24,11 +24,8 @@ choles ~ i_hhsize
 #physical~a*lone
 
 '
-modelfitcholes <- cfa(modelcholes, USoc, std.lv = T)
+modelfitcholes <- cfa(modelcholes, USoc, std.lv = T, missing = 'FIML')
 summary(modelfitcholes, fit = T, standardized = T)
-modindices(modelfitcholes, sort = T)
-semPaths(modelfitcholes, what = "stand")
-
 
 
 modelbp <-'
@@ -50,7 +47,7 @@ bp ~ i_hhsize
 
 
 '
-modelfitbp <- cfa(modelbp, USoc, std.lv = T)
+modelfitbp <- cfa(modelbp, USoc, std.lv = T, missing = 'FIML')
 summary(modelfitbp, fit = T, standardized = T)
 modindices(modelfitbp, sort = T)
 
@@ -71,10 +68,9 @@ cardio ~ i_hhsize
 cardio ~ lone
 
 #lone  ~    i_finnow
-#physical~a*lone
 
 ' 
-modelfitcardio <- cfa(modelcardio, USoc, std.lv = T)
+modelfitcardio <- cfa(modelcardio, USoc, std.lv = T, missing = 'FIML')
 summary(modelfitcardio, fit = T, standardized = T)
 modindices(modelfitcardio, sort = T)
 
@@ -97,25 +93,12 @@ diab ~ lone
 
 
 '
-modelfitdiab <- cfa(modeldiab, USoc, std.lv = T)
+modelfitdiab <- cfa(modeldiab, USoc, std.lv = T, missing = 'FIML')
 summary(modelfitdiab, fit = T, standardized = T)
 modindices(modelfitcardio, sort = T)
 
 
-#Need to Scale
 
-USoc$i_sf12pcs_dv <- scale(USoc$i_sf12pcs_dv)
-USoc$i_sf12mcs_dv <- scale(USoc$i_sf12mcs_dv)
-USoc$i_sclfsato <- scale(USoc$i_sclfsato)
-USoc$c_big5n_dv <- scale(USoc$c_big5n_dv)
-
-
-
-sem_model <- sem(semmodel, USoc, 
-                 #se = 'bootstrap',
-                 missing = 'fiml')
-summary(sem_model, fit.measures = T, standardized =T, ci = T)
-modindices(sem_model, sort = T)
 
 test <- '
 
@@ -190,7 +173,13 @@ hcharth ~~ hcdiab
 test_fit <- sem(test, USoc, 
                 missing = 'FIML')
 summary(test_fit, fit.measures = T, standardized =T, ci = T)
+std_1 <- standardizedsolution(test_fit)
 
+#lhs op         rhs est.std    se       z pvalue ci.lower ci.upper
+#choles  ~        lone   0.173 0.031   5.608  0.000    0.112    0.233
+#bp  ~        lone   0.055 0.011   4.963  0.000    0.033    0.077
+#cardio  ~        lone   0.188 0.022   8.616  0.000    0.145    0.231
+#diab  ~        lone   0.065 0.010   6.753  0.000    0.046    0.083
 
 test2 <- '
 
@@ -265,13 +254,21 @@ hcbp ~~ hcdiab
 hcharth ~~ hcdiab
 
 
-
+lone ~ i_finnow
 '
 
 test_fit2 <- sem(test2, USoc, 
                 missing = 'FIML')
 summary(test_fit2, fit.measures = T, standardized =T, ci = T)
 
+
+std_2 <- standardizedsolution(test_fit2)
+
+#lhs op         rhs est.std    se       z pvalue ci.lower ci.upper
+#choles  ~        lone   0.136 0.031   4.442  0.000    0.076    0.197
+#bp  ~        lone   0.043 0.012   3.716  0.000    0.020    0.066
+#cardio  ~        lone   0.171 0.021   7.998  0.000    0.129    0.213
+#diab  ~        lone   0.044 0.010   4.386  0.000    0.024    0.063
 
 test3 <- '
 
@@ -353,17 +350,28 @@ hcbp ~~ hcdiab
 hcharth ~~ hcdiab
 
 
+lone ~ i_finnow
 
 '
 test_fit3 <- sem(test3, USoc, 
                  missing = 'FIML')
 summary(test_fit3, fit.measures = T, standardized =T, ci = T)
 
-test4 <- '
+std_3 <- standardizedsolution(test_fit3)
+
+#lhs op         rhs est.std    se       z pvalue ci.lower ci.upper
+#choles  ~        lone   0.124 0.030   4.146  0.000    0.065    0.183
+#bp  ~        lone   0.039 0.012   3.297  0.001    0.016    0.061
+#cardio  ~        lone   0.167 0.021   7.808  0.000    0.125    0.209
+#diab  ~        lone   0.038 0.010   3.871  0.000    0.019    0.058
+
+
+
+sem_model <- '
 
 cholesbio =~ hdl + trig 
 choleself =~ hcheat + hcang  + hccor 
-choles =~ choleself + cholesbio
+choles =~ cholesbio + choleself
 
 bp =~ omdiaval + omsysval + hcbp
 
@@ -377,7 +385,6 @@ lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
 
 #physical activity (higher values is exercising more)
 physical =~ i_vday + i_mday + i_wday
-
 
 choles ~ lone
 choles ~ i_dvage
@@ -413,96 +420,9 @@ diab ~ physical
 diab ~ i_hhsize
 
 
-#Biomarker covariances
-trig ~~ hba1c
-trig ~~ hscrp
-trig ~~ omdiaval
-trig ~~ omsysval
-hdl ~~ hba1c
-hdl ~~ hscrp
-hdl ~~ omdiaval 
-hdl ~~ omsysval
-hba1c ~~ hscrp
-hba1c ~~ omdiaval 
-hba1c ~~ omsysval
-hscrp ~~ omdiaval 
-hscrp ~~ omsysval 
-
-
-#Self-Report Covariances
-hcheat ~~ hcbp
-hcheat ~~ hcharth
-hcheat ~~ hcdiab
-hcang ~~ hcbp
-hcang ~~ hcharth
-hcang ~~ hcdiab
-hccor ~~ hcbp
-hccor ~~ hcharth
-hccor ~~ hcdiab
-hcbp ~~ hcharth
-hcbp ~~ hcdiab
-hcharth ~~ hcdiab
-
-
-
-'
-test_fit4 <- sem(test4, USoc, 
-                 missing = 'FIML')
-summary(test_fit4, fit.measures = T, standardized =T, ci = T)
-
-
-
-sem_model <- '
-
-cholesbio =~ hdl + trig 
-choleself =~ hcheat + hcang  + hccor 
-choles =~ choleself + cholesbio
-
-bp =~ omdiaval + omsysval + hcbp
-
-cardio =~ hscrp + hcharth 
-
-diab =~ hba1c + hcdiab
-
-
-#loneliness (higher values is being more lonely)
-lone =~ i_sclonely + i_scisolate + i_scleftout + i_sclackcom
-
-#physical activity (higher values is exercising more)
-physical =~ i_vday + i_mday + i_wday
-
-choles ~ i_dvage
-choles ~ i_sex
-choles ~ c1*lone
-choles ~ i_hhsize
-choles ~ i_finnow
-choles ~ b1*physical
-
-bp ~ i_dvage
-bp ~ i_sex
-bp ~ c2*lone
-bp ~ i_hhsize
-bp ~ i_finnow
-bp ~ b2*physical
-
-cardio ~ i_dvage
-cardio ~ i_sex
-cardio ~ c3*lone
-cardio ~ i_hhsize
-cardio ~ i_finnow
-cardio ~ b3*physical
-
-
-diab ~ i_dvage
-diab ~ i_sex
-diab ~ c4*lone
-diab ~ i_hhsize
-diab ~ i_finnow
-diab ~ b4*physical
-
-
 
 lone~i_finnow
+lone~i_hhsize
 
 
 #Biomarker covariances
@@ -544,20 +464,236 @@ sem_modelfit <- sem(sem_model, USoc,
                 missing = 'FIML')
 summary(sem_modelfit, fit.measures = T, standardized =T, ci = T)
 modindices(sem_modelfit, sort = T)
-
 semPaths(sem_modelfit, what = "stand")
 
 
 lavInspect(sem_modelfit, "cov.lv")
 
 
-USoc %>% 
-  select(starts_with("i")) %>% 
-  describe %>% 
-  as.data.frame() %>%
-  rownames_to_column(., var = "variable") %>% 
-  select(variable,n, mean,sd,skew,kurtosis) %>%
-  kable(digits = 2) %>%
-  kable_styling(full_width = FALSE)
+#
 
-citation()
+library(survminer)
+library(meta)
+library(metaSEM)
+library(dplyr)
+library(forestplot)
+library(tibble)
+library(grid)
+library(forestploter)
+install.packages("forestploter")
+
+plotsem <- standardizedsolution(sem_modelfit)#$est.std[1.1]
+head(plotsem)
+
+forest.meta(allmodels)
+
+
+p <- forest(allmodels[,c(1,11)],
+            est = allmodels$est.std,
+            lower = allmodels$ci.lower, 
+            upper = allmodels$ci.upper,
+            sizes = allmodels$se,
+            arrow_lab = c("Placebo Better", "Treatment Better"),
+            
+            ci_column = 2,
+            ref_line = 1,
+            footnote = "This is the demo data. Please feel free to change\nanything you want.")
+
+plot(p)
+
+forest.meta(sem_modelfit, sortvar = TE,
+            prediction = TRUE, 
+            print.tau2 = FALSE)
+
+??foresplot
+
+plotsem[22:47, ] |> 
+  forestplot(labeltext = c(lhs, op, rhs, est.std),
+             mean = est.std,
+             lower = ci.lower,
+             upper = ci.upper,)|>
+               fp_set_style(box = "royalblue",
+                            line = "darkblue",
+                            summary = "royalblue")|> 
+  fp_add_header(lhs = c("", "Outcome"),
+                est.std = c("", "Std All"),
+                op = c("", "by"),
+                rhs = c("", "Predictor"))|>
+  fp_decorate_graph(box = gpar(lty = 2, col = "lightgray"),
+                    graph.pos = 4) |> 
+  fp_set_zebra_style("#EFEFEF")
+
+
+
+base_data <- tibble(est.std  = c(0.578, 0.165, 0.246, 0.700, 0.348, 0.139, 1.017),
+                            ci.lower = c(0.372, 0.018, 0.072, 0.333, 0.083, 0.016, 0.365),
+                            ci.upper = c(0.898, 1.517, 0.833, 1.474, 1.455, 1.209, 2.831),
+                            Model = c("Loneliness + Age + Sex", "~ + Financial", "~ + Physical Activity", "~ Living Alone"),
+                            Outcome = c("Cholesterol", "BP", "CVD", "Diabetes"),
+                            OR = c("0.58", "0.16", "0.25", "0.70", "0.35", "0.14", "1.02"),
+                            p = c("0.58", "0.16", "0.25", "0.70", "0.35", "0.14", "1.02"),
+                            se = c(),
+                            z = c())
+
+
+allmodels <- std_1[c(19, 22, 25, 28), ] %>%
+  full_join(std_2[c(19, 23, 27, 31), ])%>%
+  full_join(std_3[c(22, 27, 32, 37), ])%>%
+  full_join(plotsem[c(22, 28, 34, 40), ])%>%
+  mutate(
+    Model = c("1", "1", "1", "1", "2", "2", "2", "2", "3", "3", "3", "3", "4", "4", "4", "4"),
+    est = round(est.std, 2),
+  )
+
+
+allmodels$lhs <- recode(allmodels$lhs, choles = "Cholesterol", bp = "BP", cardio = "CVD", diab = "Diabetes")
+
+allmodels <- tibble(allmodels)
+allmodels$Model <- as.integer(allmodels$Model)
+
+
+allmodels %>%
+  group_by(lhs)%>%
+  arrange(.by_group = T)
+
+
+allmodels |>   
+  forestplot(labeltext = c(Model, lhs, est),
+             mean = est.std,
+             lower = ci.lower,
+             upper = ci.upper,
+             xlab="Parameters (STD)",
+             title = "Incremmental Models (UKHLS)")|>
+  fp_set_style(box = "royalblue",
+               line = "darkblue",
+               summary = "royalblue")|> 
+  fp_add_header(lhs = c("", "Outcome"),
+                est = c("", "STD"),
+                Model = c("", "Model"))|>
+  fp_set_zebra_style("#EFEFEF")
+
+
+
+allmodels |> 
+  forestplot(labeltext = c(lhs, est, Model),
+           mean = cbind(allmodels[1:4, "est.std"], allmodels[5:8, "est.std"], allmodels[9:12, "est.std"], allmodels[13:16, "est.std"]),
+           lower = cbind(allmodels[1:4, "ci.lower"], allmodels[5:8, "ci.lower"],allmodels[9:12, "ci.lower"], allmodels[13:16, "ci.lower"]),
+           upper = cbind(allmodels[1:4, "ci.upper"], allmodels[5:8, "ci.upper"],allmodels[9:12, "ci.upper"], allmodels[13:16, "ci.upper"]),
+           col=fpColors(box=c("blue", "darkred")),
+           xlab="EQ-5D index")
+
+allmodels |> 
+  forestplot(labeltext = c(lhs, est, Model),
+             mean = cbind(allmodels[1:4, "est.std"], allmodels[5:8, "est.std"], allmodels[9:12, "est.std"], allmodels[13:16, "est.std"]),
+             lower = cbind(allmodels[1:4, "ci.lower"], allmodels[5:8, "ci.lower"],allmodels[9:12, "ci.lower"], allmodels[13:16, "ci.lower"]),
+             upper = cbind(allmodels[1:4, "ci.upper"], allmodels[5:8, "ci.upper"],allmodels[9:12, "ci.upper"], allmodels[13:16, "ci.upper"]),
+             col=fpColors(box=c("blue", "darkred")),
+             xlab="EQ-5D index")
+
+allmodels[c(1,5,9,13), "est.std"]
+
+
+
+test_data <- data.frame(id = 1:4,
+                        coef1 = c(1, 1.59, 1.3, 1.24),
+                        coef2 = c(1, 1.7, 1.4, 1.04),
+                        low1 = c(1, 1.3, 1.1, 0.99),
+                        low2 = c(1, 1.6, 1.2, 0.7),
+                        high1 = c(1, 1.94, 1.6, 1.55),
+                        high2 = c(1, 1.8, 1.55, 1.33))
+
+
+out_data <- test_data |>
+  pivot_longer(cols = everything() & -id) |>
+  mutate(group = gsub("(.+)([12])$", "\\2", name),
+         name = gsub("(.+)([12])$", "\\1", name)) |>
+  pivot_wider() |>
+  group_by(id) |>
+  mutate(col1 = lapply(id, \(x) ifelse(x < 4,
+                                       paste("Category", id),
+                                       expression(Category >= 4))),
+         col2 = lapply(1:n(), \(i) substitute(expression(bar(x) == val),
+                                              list(val = mean(coef) |> round(2)))),
+         col2 = if_else(id == 1,
+                        rep("ref", n()) |> as.list(),
+                        col2)) |>
+  group_by(group)
+
+out_data |>
+  forestplot(mean = coef,
+             lower = low,
+             upper = high,
+             labeltext = c(col1, col2),
+             title = "Cool study",
+             zero = c(0.98, 1.02),
+             grid = structure(c(2^-.5, 2^.5),
+                              gp = gpar(col = "steelblue", lty = 2)
+             ),
+             boxsize = 0.25,
+             xlab = "The estimates",
+             new_page = TRUE,
+             legend = c("Treatment", "Placebo"),
+             legend_args = fpLegend(
+               pos = list("topright"),
+               title = "Group",
+               r = unit(.1, "snpc"),
+               gp = gpar(col = "#CCCCCC", lwd = 1.5)
+             )) |>
+  fp_set_style(box = c("royalblue", "gold"),
+               line = c("darkblue", "orange"),
+               summary = c("darkblue", "red"))
+
+
+allmodels |>
+  group_by()|>
+  forestplot(mean = est.std,
+             lower = ci.lower,
+             upper = ci.upper,
+             labeltext = c(lhs,est),
+             title = "Cool study",
+             zero = c(0.98, 1.02),
+             grid = structure(c(2^-.5, 2^.5),
+                              gp = gpar(col = "steelblue", lty = 2)
+             ),
+             boxsize = 0.25,
+             xlab = "The estimates",
+             new_page = TRUE,
+             legend = c("Treatment", "Placebo"),
+             legend_args = fpLegend(
+               pos = list("topright"),
+               title = "Group",
+               r = unit(.1, "snpc"),
+               gp = gpar(col = "#CCCCCC", lwd = 1.5)
+             )) |>
+  fp_set_style(box = c("royalblue", "gold"),
+               line = c("darkblue", "orange"),
+               summary = c("darkblue", "red"))
+
+allmodels$lhs
+
+forestplot::dfHRQoL 
+
+??forestplot2
+dt <- read.csv(system.file("dfHRQoL", package = "forestplot"))
+
+
+library(Gmisc)
+install.packages("Gmisc")
+
+forestplot(mean=cbind(std_1[c(19, 22, 25, 28),"est.std"], std_2[c(19, 23, 27, 31),"est.std"], std_3[c(22, 27, 32, 37),"est.std"], plotsem[c(22, 28, 34, 40),"est.std"]), 
+            lower=cbind(std_1[c(19, 22, 25, 28),"ci.lower"], std_2[c(19, 23, 27, 31),"ci.lower"], std_3[c(22, 27, 32, 37),"ci.lower"], plotsem[c(22, 28, 34, 40),"ci.lower"]), 
+            upper=cbind(std_1[c(19, 22, 25, 28),"ci.upper"], std_2[c(19, 23, 27, 31),"ci.upper"], std_3[c(22, 27, 32, 37),"ci.upper"], plotsem[c(22, 28, 34, 40),"ci.upper"]), 
+           labeltext= c("Cholesterol", "BP", "CVD", "Diabetes"),
+           legend=c("Model 1", "Model 2", "Model 3", "Final Model"), 
+           col=fpColors(box=c("darkred", "royalblue", "gold", "orange"),
+                        line=c("darkred", "royalblue", "gold", "orange")),
+           xlab="Standardized Parameters",
+           fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI, fpDrawDiamondCI, fpDrawPointCI),
+)|>fp_set_zebra_style("#EFEFEF")
+
+
+??fn.ci_norm
+?rownames
+labeltext= c("Cholesterol", "BP", "CVD", "Diabetes"),
+rownames(std_1[c(19, 22, 25, 28), ]),
+labeltext = c(lhs, op, rhs, est.std)
