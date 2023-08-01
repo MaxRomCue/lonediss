@@ -381,7 +381,7 @@ USoc <- US %>%
     selfoutcome = ifelse(selfreporttotal>0, 1, selfreporttotal)#binary
   )
   
-summary(USoc$hcbp)
+
 
 #model
 modelself <- lm(selfreporttotal ~ i_sclonely * (i_vday + i_mday + i_wday) + i_hhsize +  + i_dvage + i_sex + i_finnow, USoc)
