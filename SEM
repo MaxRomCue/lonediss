@@ -156,6 +156,7 @@ hichol_w1 ~~ diab_w1
 sem_model_1 <- sem(sem_model1, LBC1936, 
                     missing = 'FIML')
 summary(sem_model_1, fit.measures = T, standardized =T, ci = T)
+std_1 <- standardizedsolution(sem_model_1)
 
 
 
@@ -216,6 +217,8 @@ hichol_w1 ~~ diab_w1
 sem_model_2 <- sem(sem_model2, LBC1936, 
                    missing = 'FIML')
 summary(sem_model_2, fit.measures = T, standardized =T, ci = T)
+
+std_2 <- standardizedsolution(sem_model_2)
 
 
 sem_model3 <- '
@@ -282,6 +285,8 @@ hichol_w1 ~~ diab_w1
 sem_model_3 <- sem(sem_model3, LBC1936, 
                    missing = 'FIML')
 summary(sem_model_3, fit.measures = T, standardized =T, ci = T)
+std_3 <- standardizedsolution(sem_model_3)
+
 
 sem_model4 <- '
 
@@ -354,6 +359,8 @@ lonely_w1 ~ livealn_w1
 sem_model_4 <- sem(sem_model4, LBC1936, 
                    missing = 'FIML')
 summary(sem_model_4, fit.measures = T, standardized =T, ci = T)
+std_4 <- standardizedsolution(sem_model_4)
+
 
 semmodel_w1 <- '
 
@@ -440,6 +447,7 @@ lonely_w1 ~ hadsa_w1
 sem_model_w1 <- sem(semmodel_w1, LBC1936, 
                     missing = 'FIML')
 summary(sem_model_w1, fit.measures = T, standardized =T, ci = T)
+std_5 <- standardizedsolution(sem_model_w1)
 
 
 
@@ -450,3 +458,24 @@ standardizedSolution(sem_model_w1, type = "std.all", se = TRUE, zstat = TRUE,
                      partable = NULL, GLIST = NULL, est = NULL,
                      output = "data.frame")
 
+#
+
+library(survminer)
+library(Gmisc)
+library(meta)
+library(metaSEM)
+library(dplyr)
+library(forestplot)
+library(tibble)
+library(grid)
+library(forestploter)
+
+forestplot(mean=cbind(std_1[c(16, 18, 20, 22),"est.std"], std_2[c(16, 20, 24, 28),"est.std"], std_3[c(16, 21, 26, 31),"est.std"], std_4[c(16, 22, 28, 34),"est.std"], std_5[c(16, 24, 32, 40),"est.std"]), 
+           lower=cbind(std_1[c(16, 18, 20, 22),"ci.lower"], std_2[c(16, 20, 24, 28),"ci.lower"], std_3[c(16, 21, 26, 31),"ci.lower"], std_4[c(16, 22, 28, 34),"ci.lower"], std_5[c(16, 24, 32, 40),"ci.lower"]), 
+           upper=cbind(std_1[c(16, 18, 20, 22),"ci.upper"], std_2[c(16, 20, 24, 28),"ci.upper"], std_3[c(16, 21, 26, 31),"ci.upper"], std_4[c(16, 22, 28, 34),"ci.upper"], std_5[c(16, 24, 32, 40),"ci.upper"]), 
+           labeltext= c("Cholesterol", "BP", "CVD", "Diabetes"),
+           legend=c("Model 1", "Model 2", "Model 3", " Model 4", "Final Model"), 
+           col=fpColors(box=c("darkred", "royalblue", "gold", "orange", "black"),
+                        line=c("darkred", "royalblue", "gold", "orange", "black")),
+           xlab="Standardized Parameters",
+           fn.ci_norm = c(fpDrawNormalCI, fpDrawCircleCI, fpDrawDiamondCI, fpDrawPointCI),)|>fp_set_zebra_style("#EFEFEF")
